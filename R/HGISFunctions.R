@@ -48,3 +48,43 @@ hgis_eff <- function(ulm, uA, cs = 3) {
   atCout <- atC12out / .99 # 99% of C is 12C, we need total C
   atC12out / atCin
 }
+
+# Normalize each run of a gas target using the mean of another target(s)
+norm_gas <- function(sample, standard, stdrat = 1.0398) {
+  sample/standard * stdrat
+}
+
+# get and process hgis data from local data folder
+get_hgis_data <- function(file, date) {
+  data <- readResfile(file) %>% 
+    mungeResfile() %>% 
+filter(as.Date(ts) %in% date)
+  
+  meanstd <- mean(data$cor1412he[data$Num == "S"])
+  
+  data <- data %>% 
+    mutate(normFm = norm_gas(cor1412he, meanstd),
+           dil_factor = case_when(str_ends(Sample.Name, "1") ~ 1,
+                                 str_starts(Sample.Name, "Dil") ~ 3,
+                                 TRUE ~ 0))
+}
+# Summary table of hgis data
+sum_hgis <- function(data) {
+  data %>% 
+    group_by(Sample.Name, Pos, dil_factor) %>%
+    summarise(Cur = mean(he12C),
+              mean = mean(normFm),
+              sd = sd(normFm),
+              se = se(normFm),
+              interr = 1/sqrt(sum(CntTotGT)),
+              N = n()) 
+}
+
+# boxplot of samples in HGIS test, colored by dilution
+plot_hgis <- function(data) {
+  data %>% 
+    mutate(Fm = ifelse(normFm > .15, "modern", "dead")) %>% 
+  ggplot(aes(Sample.Name, normFm, fill = as.factor(dil_factor))) +
+    geom_boxplot() +
+    facet_grid(Fm~., scales = "free_y")
+}
