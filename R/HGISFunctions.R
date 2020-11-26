@@ -71,20 +71,25 @@ filter(as.Date(ts) %in% date)
 # Summary table of hgis data
 sum_hgis <- function(data) {
   data %>% 
-    group_by(Sample.Name, Pos, dil_factor) %>%
+    group_by(Pos, Sample.Name, dil_factor) %>%
     summarise(Cur = mean(he12C),
               mean = mean(normFm),
               sd = sd(normFm),
-              se = se(normFm),
               interr = 1/sqrt(sum(CntTotGT)),
               N = n()) 
 }
 
 # boxplot of samples in HGIS test, colored by dilution
+# TODO: put in lines for expected value of modern gas standard
 plot_hgis <- function(data) {
   data %>% 
-    mutate(Fm = ifelse(normFm > .15, "modern", "dead")) %>% 
-  ggplot(aes(Sample.Name, normFm, fill = as.factor(dil_factor))) +
+    mutate(Fm = ifelse(normFm > .15, "modern", "dead"),
+           Fm = ordered(Fm, levels = c("modern", "dead")),
+           Dillution_Ratio = as.factor(dil_factor)) %>% 
+  ggplot(aes(Sample.Name, normFm, fill = Dillution_Ratio)) +
     geom_boxplot() +
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, vjust=0.5)) +
+    labs(y = "Fraction Modern") +
     facet_grid(Fm~., scales = "free_y")
 }
