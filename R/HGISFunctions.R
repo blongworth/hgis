@@ -79,29 +79,24 @@ sum_hgis <- function(data) {
               N = n()) 
 }
 
+
 # boxplot of samples in HGIS test, colored by dilution
-# TODO: put in lines for expected value of modern gas standard
 plot_hgis <- function(data) {
   
-  data <- data %>% 
+  data %>% 
     mutate(Fm = ifelse(normFm > .15, "modern", "dead"),
+           Name = factor(Sample.Name, levels = unique(Sample.Name[order(Fm, dil_factor)])),
            Fm = ordered(Fm, levels = c("modern", "dead")),
-           Dillution_Ratio = as.factor(dil_factor)) 
-  
-  ord <- data %>% 
-    select(Sample.Name, Fm, dil_factor) %>% 
-    arrange(desc(Fm), dil_factor) %>% 
-    pull(Sample.Name) %>% 
-    unique()
-  
-  ggplot(data, aes(factor(Sample.Name, level = ord), normFm, fill = Dillution_Ratio)) +
-    geom_boxplot() +
-    geom_hline(data = data.frame(yint=1,Fm=ordered("modern", levels = c("modern", "dead"))), aes(yintercept = yint)) + 
-    geom_hline(data = data.frame(yint=0,Fm=ordered("dead", levels = c("modern", "dead"))), aes(yintercept = yint)) + 
-    theme_classic() +
-    theme(axis.text.x = element_text(angle = 45, vjust=0.5)) +
-    labs(x = NULL,
-         y = "Fraction Modern") +
-    facet_grid(Fm~., scales = "free_y")
+           Dillution_Ratio = as.factor(dil_factor)) %>%  
+    ggplot(aes(Name, normFm, fill = Dillution_Ratio)) +
+      geom_boxplot() +
+      geom_hline(data = data.frame(yint=1,Fm=ordered("modern", levels = c("modern", "dead"))),
+                 aes(yintercept = yint)) + 
+      geom_hline(data = data.frame(yint=0,Fm=ordered("dead", levels = c("modern", "dead"))), 
+                 aes(yintercept = yint)) + 
+      theme_classic() +
+      theme(axis.text.x = element_text(angle = 45, vjust=0.5)) +
+      labs(x = NULL,
+           y = "Fraction Modern") +
+      facet_grid(Fm~., scales = "free_y")
 }
-
