@@ -87,7 +87,7 @@ plot_hgis <- function(data) {
     mutate(Fm = ifelse(normFm > .15, "modern", "dead"),
            Name = factor(Sample.Name, levels = unique(Sample.Name[order(Fm, dil_factor)])),
            Fm = ordered(Fm, levels = c("modern", "dead")),
-           Dillution_Ratio = as.factor(dil_factor)) %>%  
+           Dillution_Ratio = ordered(dil_factor, levels = c(0, 1, 3))) %>%  
     ggplot(aes(Name, normFm, fill = Dillution_Ratio)) +
       geom_boxplot() +
       geom_hline(data = data.frame(yint=1,Fm=ordered("modern", levels = c("modern", "dead"))),
@@ -95,7 +95,8 @@ plot_hgis <- function(data) {
       geom_hline(data = data.frame(yint=0,Fm=ordered("dead", levels = c("modern", "dead"))), 
                  aes(yintercept = yint)) + 
       theme_classic() +
-      theme(axis.text.x = element_text(angle = 45, vjust=0.5)) +
+      theme(axis.text.x = element_text(angle = 45, hjust=1)) +
+      scale_fill_manual(values = c("0" = "slategray1", "1" = "slategray2", "3" = "slategray3")) +
       labs(x = NULL,
            y = "Fraction Modern") +
       facet_grid(Fm~., scales = "free_y")
