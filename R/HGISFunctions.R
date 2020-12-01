@@ -76,7 +76,8 @@ sum_hgis <- function(data) {
               mean = mean(normFm),
               sd = sd(normFm),
               interr = 1/sqrt(sum(CntTotGT)),
-              N = n()) 
+              acqtime = sum(Cycles)/10,
+              N_acq = n()) 
 }
 
 
