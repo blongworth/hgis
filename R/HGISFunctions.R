@@ -57,8 +57,11 @@ norm_gas <- function(sample, standard, stdrat = 1.0398) {
 # get and process hgis data from local data folder
 get_hgis_data <- function(file, date) {
   data <- readResfile(file) %>% 
-    mungeResfile() %>% 
-filter(as.Date(ts) %in% date)
+    mungeResfile()
+  
+  if (!missing(date)) {
+    data <- filter(data, as.Date(ts) %in% date)
+  }
   
   meanstd <- mean(data$cor1412he[data$Num == "S"])
   
@@ -66,7 +69,8 @@ filter(as.Date(ts) %in% date)
     mutate(normFm = norm_gas(cor1412he, meanstd),
            dil_factor = case_when(str_ends(Sample.Name, "1") ~ 1,
                                  str_starts(Sample.Name, "Dil") ~ 3,
-                                 TRUE ~ 0))
+                                 TRUE ~ 0),
+           pos_name = paste(Pos, Sample.Name, sep = " - "))
 }
 # Summary table of hgis data
 sum_hgis <- function(data) {
@@ -86,7 +90,7 @@ plot_hgis <- function(data) {
   
   data %>% 
     mutate(Fm = ifelse(normFm > .15, "modern", "dead"),
-           Name = factor(Sample.Name, levels = unique(Sample.Name[order(Fm, dil_factor)])),
+           Name = factor(pos_name, levels = unique(pos_name[order(Fm, dil_factor)])),
            Fm = ordered(Fm, levels = c("modern", "dead")),
            Dillution_Ratio = ordered(dil_factor, levels = c(0, 1, 3))) %>%  
     ggplot(aes(Name, normFm, fill = Dillution_Ratio)) +
@@ -95,10 +99,16 @@ plot_hgis <- function(data) {
                  aes(yintercept = yint)) + 
       geom_hline(data = data.frame(yint=0,Fm=ordered("dead", levels = c("modern", "dead"))), 
                  aes(yintercept = yint)) + 
-      theme_classic() +
       theme(axis.text.x = element_text(angle = 45, hjust=1)) +
       scale_fill_manual(values = c("0" = "slategray1", "1" = "slategray2", "3" = "slategray3")) +
       labs(x = NULL,
            y = "Fraction Modern") +
       facet_grid(Fm~., scales = "free_y")
+}
+
+# plot of normalized ratio vs time
+plot_hgis_time <- function(data) {
+  ggplot(data, aes(ts, normFm)) +
+    geom_point() + 
+    facet_wrap(vars(pos_name), scales = "free")
 }
