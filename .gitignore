@@ -6,3 +6,9 @@
 *.pdf
 *.log
 *.tex
+*.aux
+*.fdb_latexmk
+*.out
+*.swp
+*.fls
+Data/*
