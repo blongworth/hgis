@@ -105,6 +105,7 @@ sum_hgis <- function(data) {
 
 
 # boxplot of samples in HGIS test, colored by dilution
+# hline for modern is mean value of tank standard rec 101730
 plot_hgis <- function(data) {
   
   data %>% 
@@ -114,7 +115,7 @@ plot_hgis <- function(data) {
            Dillution_Ratio = ordered(dil_factor, levels = c(0, 1, 3))) %>%  
     ggplot(aes(Name, normFm, fill = Dillution_Ratio)) +
       geom_boxplot() +
-      geom_hline(data = data.frame(yint=1,Fm=ordered("modern", levels = c("modern", "dead"))),
+      geom_hline(data = data.frame(yint=1.0377,Fm=ordered("modern", levels = c("modern", "dead"))),
                  aes(yintercept = yint)) + 
       geom_hline(data = data.frame(yint=0,Fm=ordered("dead", levels = c("modern", "dead"))), 
                  aes(yintercept = yint)) + 
