@@ -2,6 +2,17 @@
 
 
 # Pouiselle's; convert delta pressure in Pa to flow in m^3/s
+#' Pouiselle's equation for flow through small tubing.
+#'
+#' @param dp Pressure differential in Pa.
+#' @param r Inner radius of capillary in m.
+#' @param u Viscosity in kg/m.
+#' @param l Length of capillary in m.
+#'
+#' @return Predicted capillary flow in m^3s-1.
+#' @export
+#'
+#' @examples
 prestoflow <- function(dp, r, u, l) {
   # r = radius of capillary
   # l = length of capillary
@@ -10,7 +21,15 @@ prestoflow <- function(dp, r, u, l) {
   flow
 }
 
-# convert gauge kPa to uL/min
+#' Calcultate flow through a capillary or tube.
+#'
+#' @param pres Differential pressure in kPa.
+#' @param ... 
+#'
+#' @return Flow in uL/min.
+#' @export
+#'
+#' @examples
 flowcalc <- function(pres, ...) {
   dppa <- pres * 1E3 #convert kPa to Pa
   flowcms <- prestoflow(dppa, ...)
