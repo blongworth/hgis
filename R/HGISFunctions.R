@@ -96,6 +96,7 @@ sum_hgis <- function(data) {
   data %>% 
     group_by(Pos, Sample.Name, dil_factor) %>%
     summarise(Cur = mean(he12C),
+              Cur.sd = sd(he12C),
               mean = mean(normFm),
               sd = sd(normFm),
               interr = 1/sqrt(sum(CntTotGT)),
