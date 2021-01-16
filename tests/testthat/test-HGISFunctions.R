@@ -1,4 +1,3 @@
-source("R/HGISFunctions.R")
 
 # Using values calculated by https://www.dolomite-microfluidics.com/support/microfluidic-calculator/ for comparison.
 test_that("Pouiselle produces right numbers", {

@@ -12,7 +12,6 @@
 #' @return Predicted capillary flow in m^3s-1.
 #' @export
 #'
-#' @examples
 prestoflow <- function(dp, r, u, l) {
   # r = radius of capillary
   # l = length of capillary
@@ -29,7 +28,6 @@ prestoflow <- function(dp, r, u, l) {
 #' @return Flow in uL/min.
 #' @export
 #'
-#' @examples
 flowcalc <- function(pres, ...) {
   dppa <- pres * 1E3 #convert kPa to Pa
   flowcms <- prestoflow(dppa, ...)
@@ -55,6 +53,15 @@ CcurtoatC <- function(cur, cs){
 
 
 # calculate efficiency from ml/m CO2 and uA C12
+#' Title
+#'
+#' @param ulm Flow in ulm-1.
+#' @param uA Post-accelerator 12C ion current in uA.
+#' @param cs Charge state to convert particle-uA to 12C current.
+#'
+#' @return Efficiency as carbon atoms in vs carbon atoms measured.
+#' @export
+#'
 hgis_eff <- function(ulm, uA, cs = 3) {
   
   # if flow is zero or less, efficiency doesn't make sense
@@ -73,7 +80,17 @@ norm_gas <- function(sample, standard, stdrat = 1.0398) {
   sample/standard * stdrat
 }
 
-# get and process hgis data from local data folder
+#' Get and process hgis data from results file.
+#'
+#' Read data file and perform standard munging with amstools::mungeResfile(). 
+#' Add dilution factor. Normalize using mean of samples marked as "S".
+#' 
+#' @param file Path to a NOSAMS format AMS results file.
+#' @param date A vector of dates to subset from file. All data used if missing.
+#'
+#' @return
+#' @export
+#'
 get_hgis_data <- function(file, date) {
   data <- readResfile(file) %>% 
     mungeResfile()
@@ -91,7 +108,15 @@ get_hgis_data <- function(file, date) {
                                  TRUE ~ 0),
            pos_name = paste(Pos, Sample.Name, sep = " - "))
 }
-# Summary table of hgis data
+
+
+#' Summary table of hgis data
+#'
+#' @param data A tibble in format of output from get_hgis_data().
+#'
+#' @return A tibble with summary data.
+#' @export
+#'
 sum_hgis <- function(data) {
   data %>% 
     group_by(Pos, Sample.Name, dil_factor) %>%
@@ -105,8 +130,15 @@ sum_hgis <- function(data) {
 }
 
 
-# boxplot of samples in HGIS test, colored by dilution
-# hline for modern is mean value of tank standard rec 101730
+#' Boxplot of samples in HGIS test, colored by dilution
+#' 
+#' hline for modern is mean value of tank standard rec 101730
+#'
+#' @param data A tibble in format of output from get_hgis_data().
+#'
+#' @return A ggplot object with Boxplots of data.
+#' @export
+#'
 plot_hgis <- function(data) {
   
   data %>% 
@@ -127,7 +159,15 @@ plot_hgis <- function(data) {
       facet_grid(Fm~., scales = "free_y")
 }
 
-# plot of normalized ratio vs time
+#' Plot of normalized ratio vs time
+#'
+#' @param data A tibble in format of output from get_hgis_data().
+#'
+#' @return A ggplot object with norm ratio and current vs time,
+#' faceted for each pos_name.
+#' 
+#' @export
+#'
 plot_hgis_time <- function(data) {
   ggplot(data, aes(ts, normFm)) +
     geom_point() + 
