@@ -1,16 +1,15 @@
 Package: HybridGIS
-Title: What the Package Does (One Line, Title Case)
+Title: Data, Functions, and Analysis for the NOSAMS Hybrid Gas Ion Source
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Brett",
+           family = "Longworth",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to
-    pick a license
+           email = "blongworth@whoi.edu",
+           comment = c(ORCID = "0000-0001-8318-2054"))
+Description: 
+License: 
 Encoding: UTF-8
-LazyData: true
+LazyData: false
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0

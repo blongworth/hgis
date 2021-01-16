@@ -75,7 +75,16 @@ hgis_eff <- function(ulm, uA, cs = 3) {
   atC12out / atCin
 }
 
-# Normalize each run of a gas target using the mean of another target(s)
+# 
+#' Normalize a gas target run using the measured and consensus value of a standard
+#'
+#' @param sample Ratio to be normalized.
+#' @param standard Measured ratio of the standard.
+#' @param stdrat Consensus value of the standard.
+#'
+#' @return The normalized ratio of the sample.
+#' @export
+#'
 norm_gas <- function(sample, standard, stdrat = 1.0398) {
   sample/standard * stdrat
 }
@@ -106,7 +115,10 @@ get_hgis_data <- function(file, date) {
            dil_factor = case_when(str_ends(Sample.Name, "1") ~ 1,
                                  str_starts(Sample.Name, "Dil") ~ 3,
                                  TRUE ~ 0),
-           pos_name = paste(Pos, Sample.Name, sep = " - "))
+           pos_name = paste(Pos, Sample.Name, sep = " - ")) %>% 
+    group_by(pos_name) %>% 
+    mutate(cum_acqtime = cumsum(Cycles) / 10) %>% 
+    ungroup()
 }
 
 
@@ -169,7 +181,7 @@ plot_hgis <- function(data) {
 #' @export
 #'
 plot_hgis_time <- function(data) {
-  ggplot(data, aes(ts, normFm)) +
+  ggplot(data, aes(cum_acqtime, normFm)) +
     geom_point() + 
     facet_wrap(vars(pos_name), scales = "free")
 }

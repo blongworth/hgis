@@ -3,6 +3,7 @@
 export(flowcalc)
 export(get_hgis_data)
 export(hgis_eff)
+export(norm_gas)
 export(plot_hgis)
 export(plot_hgis_time)
 export(prestoflow)
