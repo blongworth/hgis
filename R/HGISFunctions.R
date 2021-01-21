@@ -1,8 +1,8 @@
 # Functions for Hybrid GIS calculations
 
 
-# Pouiselle's; convert delta pressure in Pa to flow in m^3/s
-#' Pouiselle's equation for flow through small tubing.
+# Poiseuille's; convert delta pressure in Pa to flow in m^3/s
+#' Poiseuille's equation for flow through small tubing.
 #'
 #' @param dp Pressure differential in Pa.
 #' @param r Inner radius of capillary in m.
@@ -20,7 +20,7 @@ prestoflow <- function(dp, r, u, l) {
   flow
 }
 
-#' Calcultate flow through a capillary or tube.
+#' Calculate flow through a capillary or tube.
 #'
 #' @param pres Differential pressure in kPa.
 #' @param ... 
