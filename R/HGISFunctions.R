@@ -75,7 +75,6 @@ hgis_eff <- function(ulm, uA, cs = 3) {
   atC12out / atCin
 }
 
-# 
 #' Normalize a gas target run using the measured and consensus value of a standard
 #'
 #' @param sample Ratio to be normalized.
@@ -154,7 +153,7 @@ sum_hgis <- function(data) {
 plot_hgis <- function(data) {
   
   data %>% 
-    mutate(Fm = ifelse(normFm > .15, "modern", "dead"),
+    mutate(Fm = ifelse(normFm > .3, "modern", "dead"),
            Name = factor(pos_name, levels = unique(pos_name[order(Fm, dil_factor)])),
            Fm = ordered(Fm, levels = c("modern", "dead")),
            Dillution_Ratio = ordered(dil_factor, levels = c(0, 1, 3))) %>%  
