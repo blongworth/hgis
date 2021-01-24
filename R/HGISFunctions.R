@@ -52,8 +52,7 @@ CcurtoatC <- function(cur, cs){
 }
 
 
-# calculate efficiency from ml/m CO2 and uA C12
-#' Title
+#' Calculate efficiency from ml/m CO2 and uA C12
 #'
 #' @param ulm Flow in ulm-1.
 #' @param uA Post-accelerator 12C ion current in uA.
@@ -135,6 +134,7 @@ sum_hgis <- function(data) {
               Cur.sd = sd(he12C),
               mean = mean(normFm),
               sd = sd(normFm),
+              exterr = normRunExtErr(normFm),
               interr = 1/sqrt(sum(CntTotGT)),
               acqtime = sum(Cycles)/10,
               N_acq = n()) 
