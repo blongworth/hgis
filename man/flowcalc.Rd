@@ -2,7 +2,7 @@
 % Please edit documentation in R/HGISFunctions.R
 \name{flowcalc}
 \alias{flowcalc}
-\title{Calcultate flow through a capillary or tube.}
+\title{Calculate flow through a capillary or tube.}
 \usage{
 flowcalc(pres, ...)
 }
@@ -15,5 +15,5 @@ flowcalc(pres, ...)
 Flow in uL/min.
 }
 \description{
-Calcultate flow through a capillary or tube.
+Calculate flow through a capillary or tube.
 }

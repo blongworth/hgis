@@ -2,7 +2,7 @@
 % Please edit documentation in R/HGISFunctions.R
 \name{hgis_eff}
 \alias{hgis_eff}
-\title{Title}
+\title{Calculate efficiency from ml/m CO2 and uA C12}
 \usage{
 hgis_eff(ulm, uA, cs = 3)
 }
@@ -17,5 +17,5 @@ hgis_eff(ulm, uA, cs = 3)
 Efficiency as carbon atoms in vs carbon atoms measured.
 }
 \description{
-Title
+Calculate efficiency from ml/m CO2 and uA C12
 }

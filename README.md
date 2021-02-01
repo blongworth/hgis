@@ -1,2 +1,233 @@
-# hgis
-Calculations and tests for the NOSAMS hybrid gas ion source
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# HybridGIS
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The HybridGIS project contains functions, analysis scripts and data for
+the NOSAMS hybrid gas ion source.
+
+## Installation
+
+You can install the development version from
+[GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("blongworth/hgis")
+```
+
+Running `make` will download the NOSAMS results files if a connection to
+the NOSAMS file server is available. `make` will eventually run the
+analysis scripts as well.
+
+## Functions
+
+Loading the package loads functions for flow calculation, efficiency,
+data import, data reduction and plotting.
+
+``` r
+library(HybridGIS)
+```
+
+# Project Summary
+
+The information below summarizes the operating parameters, development,
+and questions for the hybrid gas ion source on USAMS.
+
+## Source parameters
+
+Best currents for the source are around 10uA 12C- or roughly 1/10 of
+graphite currents. This is in line with what other hybrid sources
+produce. The source typically produces best current at around 5uLs-1
+CO2. Literature values give 1.5uLs-1 as optimal, but we’ve never seen
+that, and pressures, capillaries and flows in at least one of these
+papers doesn’t make sense.
+
+Source currents are variable by day and by target. “Good” currents for a
+given day vary between 5-10uA, and it’s not yet clear what causes this
+variability. Alignment, source condition, and settings of the ionizer
+and cesium are all factors. Current also varies by target for a given
+set of gas and source conditions. Some targets are clearly “bad”,
+producing currents much lower than other targets for a given set of
+conditions.
+
+Precision taken as the standard error of the mean of repeated runs of a
+sample is around 1%. Precision is typically a little worse than
+predicted by counting statistics. More work is needed to look at whether
+this reflects variability between samples.
+
+Measured value of tank modern gas normalized to solid graphite standards
+ranges from agreeing with solid OX-I to 7% lower than expected for low
+current samples. Normalizing to tank CO2 is probably the best method to
+account for variability in hybrid source performance.
+
+The system seems to have a constant blank contribution from the target
+and source of about 100nA 12C- or 1% of a sample producing 10uA 12C-.
+Helium does not seem to add significantly to this blank. Since the blank
+current is constant, the blank contribution is inversely related to the
+sample current, ie. if the sample current is 5uA, 2% of that will be
+from the blank and so on.
+
+The above measurements are at optimum sample current of 6-10uA 12C-.
+Precision and measured ratio both decrease as sample current drops below
+the optimum range. The ratio effects may be related to the “constant
+current” blank discussed above. More work is needed to see whether this
+is just a blank effect or whether there are other factors at low
+current.
+
+## Open split inlet
+
+The open split interface supplies a helium-co2 mixture to a split where
+a capillary delivers gas to the source and the rest is vented. The
+current split starts showing “breakthrough” of lab air at around
+150uL/min flow. A new open split with lower volume should have improved
+this, but testing is needed.
+
+Currently, 250cm of 50um capillary defines flow rate from the open split
+into the source, with a bulkhead connector at the source cage. Precision
+of measurements of modern CO2 has been better than 1% (std error of mean
+of measurements of a target) for high current samples, with precision
+dropping off as current decreases below 6uA or so. Accuracy is
+reasonable within the large errors on gas measurements. Uncorrected
+measurements of dead CO2 range from 1% to 5% of modern depending on
+sample current.
+
+Measurement of a small number of replicates shows that between sample
+reproducibility is around 1%. Samples displaced by helium have slightly
+higher variability, but more tests are needed to better assess
+reproducibility.
+
+### Helium displacement from vials
+
+The test setup for extracting CO2 from septa-sealed vials is as follows:
+a double needle is inserted into the vial through the septa. One side of
+the needle is connected to helium which is used to force CO2 from the
+vial through the other side of the needle. The outflow from the vial
+enters an open split where a capillary is used to admit sample to the
+ion source. The system is currently set up to run with samples starting
+at atmospheric pressure.
+
+First tests of displacing pure CO2 from a vial into the open split using
+helium are promising. Helium flowing at 100uLm-1 produces current from
+7mL of CO2 for over 2 hours. Currents do decrease with time due to
+dilution, but by supplying higher than optimal CO2 flow to the source
+initially, stable currents can be maintained for some time. Setting flow
+to the source to 10uL/min provides excess CO2 to source until the helium
+dilution ratio increases to &gt; 1:1. Another approach may be to
+backfill vials with helium and run at a higher dilution ratio and flow
+to the source. This should produce a smaller change in He:CO2 over the
+course of a run. MICADAS runs at 95% He:CO2, which would mean producing
+&lt; 0.5mL CO2 in a 7mL vial and backfilling with helium before
+displacing to the source. Some intermediate dilution may be appropriate.
+
+Targets have shown “pulses” of higher current. Not sure why this is, but
+I suspect it’s either buildup of graphite or other available carbon on
+the target, or target switching to the “high state” as sometimes happens
+with solid targets.
+
+## Questions
+
+Q: Background from the source/target is relatively stable at roughly
+100nA or 1% of maximum CO2 current. Is the relative blank contribution
+proportional to CO2 current?
+
+A: Based on limited data, it’s looking like yes, this follows a constant
+contamination model.
+
+Q: If the relative blank contribution is proportional to sample current,
+can we correct for a varying sample current over a run (due to variable
+dilution, pressure, etc.)?
+
+A: If the sample current varies widely, this will likely require taking
+data in shorter segments and blank correcting each segment using the
+mean current for that segment. We may be able to mitigate by setting
+capillary length such that CO2 flow starts above optimal and drops to
+optimal by the end of the acquisition.
+
+Q: Does standard error of the mean as a sample error agree with between
+target variability?
+
+A: Initial data from identical samples run under similar conditions show
+standard deviation of around 1-1.5% for modern samples.
+
+## To do
+
+-   More repeated measurements under identical conditions to determine
+    reproducibility
+-   Test breakthrough with new open split
+-   Establish best helium flow for displacement
+-   Fine tune capillary length for best flow to source over pCO2 range
+    of full size sample
+-   How to handle &lt; 1 Atm in vials. Backfill?
+-   Measure test samples prepped on Gilson (7mL CO2, Atm pressure)
+-   Define blank, determine whether current-balance correction is
+    needed.
+-   Refine normalization and error propagation for data reduction.
+
+## Development
+
+2021-01-29 - Ran a series of vial tests with modern and dead CO2 to
+assess reproducibility.
+
+2021-01-22 - Ran pure CO2 at different pressures to look at effect of
+current on precision and ratio. Repeated test for live and dead tank
+CO2.
+
+2021-01-15 - Pure CO2 and displacement tests using vial and double
+needle. Tested precision with vial setup by flowing CO2 at 200kPa (high
+flow, roughly 400ul/min) into open split. Followed this by switching to
+helium flow to vial at 100kPa (200ul/min). Repeated test with a second
+vial. Built second dual needle setup for use in vial filling (can also
+use Gilson).
+
+2021-01-08 - Precision tests with direct CO2-source connection. Tested
+source pressure and current vs CO2 regulator pressure. Tested flow vs
+pressure with leak checker. Several capillary swaps. Acquired data at
+several flow rates for precision testing.
+
+2021-01-07 - Set up for precision test using 7m x 50um capillary from
+CO2/he via Valco valve to cage wall.
+
+2020-12-31 - Add CO2/He valve to vial test setup. VICI 4-way valve
+connected with 1/16" ss tubing from CO2 and He regulators allows
+switching between gasses delivered to a glass capillary leading to outer
+needle of dual needle. Leak checking and capillary adjustments for good
+flow range at reasonable pressures.
+
+2020-12-24 - Build dual needle setup. Supply displacement helium through
+outer 1/16" tubing, sample mixture through inner needle. Use VICI Luer
+adapter on top of needle as open split with inserted capillary to
+source.
+
+2020-12-18 - Continue testing lower open split flows with leak checker,
+run dead and live gas at lower flows. Spoke with Josh B. about double
+needle setups.
+
+2020-12-11 - Open split flow reduction. Test flow controller for helium,
+adjust needle valves to allow lower CO2 flows. Measure blanks of target,
+helium, CO2 and diluted CO2.
+
+2020-12-04 - Measure blank contributions of target/source, helium, CO2,
+and diluted CO2. Install flow controller for helium.
+
+2020-12-03 - Prepare and load new HGIS test wheel.
+
+2020-11-17 - Diagnose issue with low currents, measure diluted and pure
+live and dead gas.
+
+2020-11-03 - Troubleshoot low currents, measure diluted and pure live
+and dead gas.
+
+2020-10-15 - Troubleshoot low currents. Lots of tune and target position
+testing.
+
+2020-10-13 - Prepare and load new HGIS test wheel.
+
+2020-10-06 - Dilution tests of live and dead gas. Test stability of
+currents over time.
+
+2020-09-29 - Starting up HGIS. Load sample wheel. Reterminate
+capillaries at cage wall and open split.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/HGISFunctions.R
 \name{prestoflow}
 \alias{prestoflow}
-\title{Pouiselle's equation for flow through small tubing.}
+\title{Poiseuille's equation for flow through small tubing.}
 \usage{
 prestoflow(dp, r, u, l)
 }
@@ -19,5 +19,5 @@ prestoflow(dp, r, u, l)
 Predicted capillary flow in m^3s-1.
 }
 \description{
-Pouiselle's equation for flow through small tubing.
+Poiseuille's equation for flow through small tubing.
 }

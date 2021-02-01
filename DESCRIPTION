@@ -7,8 +7,8 @@ Authors@R:
            role = c("aut", "cre"),
            email = "blongworth@whoi.edu",
            comment = c(ORCID = "0000-0001-8318-2054"))
-Description: 
-License: 
+Description: The HybridGIS project contains functions, analysis scripts and data for the NOSAMS hybrid gas ion source.
+License: AGPL-3
 Encoding: UTF-8
 LazyData: false
 Roxygen: list(markdown = TRUE)
