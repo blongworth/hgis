@@ -113,7 +113,7 @@ get_hgis_data <- function(file, date) {
            dil_factor = case_when(str_ends(Sample.Name, "1") ~ 1,
                                  str_starts(Sample.Name, "Dil") ~ 3,
                                  TRUE ~ 0),
-           pos_name = paste(Pos, Sample.Name, sep = " - ")) %>% 
+           pos_name = reorder(paste(Pos, Sample.Name, sep = " - "), as.numeric(Pos))) %>% 
     group_by(pos_name) %>% 
     mutate(cum_acqtime = cumsum(Cycles) / 10) %>% 
     ungroup()
