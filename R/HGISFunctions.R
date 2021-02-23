@@ -184,3 +184,26 @@ plot_hgis_time <- function(data) {
     geom_point() + 
     facet_wrap(vars(pos_name), scales = "free")
 }
+
+
+#' Calculate fraction of CO2 in a container vs. time when displaced by another gas
+#' 
+#' CO2 is displaced from a vial by introducing helium through one side 
+#' of a double needle and allowing the mixture to flow out via the 
+#' other side of the needle. Pressure is maintained at 1ATM as the 
+#' outlet is open to air.
+#'
+#' TODO: Allow specification of a starting mixture of HE and CO2.
+#' 
+#' @param t time in same units as r
+#' @param V volume of vessel in same units as r
+#' @param r rate of displacement gas flow
+#' @param flow rate of gas flow in capillary or outflow. Default of 1 returns fraction of CO2. Should be less than r.
+#'
+#' @return Fractional concentration of CO2 in vessel (and outflow).
+#' @export
+#'
+#' @examples
+concCO2 <- function(t, V = 7000, r = 100, flow = 1) {
+  exp(-(r/V)*t) * flow
+}
