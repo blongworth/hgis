@@ -39,5 +39,10 @@ Loading the package loads functions for flow calculation, efficiency, data impor
 library(HybridGIS)
 ```
 
+# Project Summary
+
+The information below summarizes the operating parameters, development, and questions
+for the hybrid gas ion source on USAMS.
+
 ```{r child='summary.Rmd'}
 ```

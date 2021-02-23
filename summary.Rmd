@@ -1,8 +1,3 @@
-# Project Summary
-
-The information below summarizes the operating parameters, development, and questions
-for the hybrid gas ion source on USAMS.
-
 ## Source parameters
 
 Best currents for the source are around 10uA 12C- or roughly 1/10 of graphite
