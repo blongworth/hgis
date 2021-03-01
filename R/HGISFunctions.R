@@ -204,6 +204,7 @@ plot_hgis_time <- function(data) {
 #' @export
 #'
 #' @examples
-concCO2 <- function(t, V = 7000, r = 100, flow = 1) {
-  exp(-(r/V)*t) * flow
+concCO2 <- function(t, V = 7000, r = 100, flow = 1, initco2 = 1) {
+  stopifnot(flow <= r)
+  initco2 * exp(-(r/V)*t) * flow
 }
