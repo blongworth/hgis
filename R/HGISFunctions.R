@@ -196,7 +196,7 @@ plot_hgis_time <- function(data, y_var = normFm, errors = NULL) {
     
     ggplot(data, aes(cum_acqtime, !!y_var)) +
       geom_pointrange(aes(ymin = !!y_var - !!errors, ymax = !!y_var + !!errors,
-                         color = outlier)) + 
+                         color = outlier), size = .2) + 
       facet_wrap(vars(pos_name), scales = "free")
   }
 }
