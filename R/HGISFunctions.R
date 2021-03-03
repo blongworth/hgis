@@ -100,23 +100,26 @@ norm_gas <- function(sample, standard, stdrat = 1.0398) {
 #'
 get_hgis_data <- function(file, date) {
   data <- readResfile(file) %>% 
-    mungeResfile()
+    mungeResfile() 
   
   if (!missing(date)) {
     data <- filter(data, as.Date(ts) %in% date)
   }
   
-  meanstd <- mean(data$cor1412he[data$Num == "S"])
-  
-  data <- data %>% 
-    mutate(normFm = norm_gas(cor1412he, meanstd),
-           dil_factor = case_when(str_ends(Sample.Name, "1") ~ 1,
+  data <- data %>%
+    mutate(dil_factor = case_when(str_ends(Sample.Name, "1") ~ 1,
                                  str_starts(Sample.Name, "Dil") ~ 3,
                                  TRUE ~ 0),
            pos_name = reorder(paste(Pos, Sample.Name, sep = " - "), as.numeric(Pos))) %>% 
     group_by(pos_name) %>% 
-    mutate(cum_acqtime = cumsum(Cycles) / 10) %>% 
+    mutate(cum_acqtime = cumsum(Cycles) / 10,
+           outlier = ifelse(is.na(removeOutliers(cor1412he)), TRUE, FALSE)) %>% 
     ungroup()
+    
+  meanstd <- mean(data$cor1412he[data$Num == "S" & !data$outlier])
+  
+  data <- data %>%
+    mutate(normFm = norm_gas(cor1412he, meanstd))
 }
 
 
@@ -173,16 +176,29 @@ plot_hgis <- function(data) {
 #' Plot of normalized ratio vs time
 #'
 #' @param data A tibble in format of output from get_hgis_data().
+#' @param y_var A column to plot against time
+#' @param errors A column containing errors for y_var
 #'
 #' @return A ggplot object with norm ratio and current vs time,
 #' faceted for each pos_name.
 #' 
 #' @export
 #'
-plot_hgis_time <- function(data) {
-  ggplot(data, aes(cum_acqtime, normFm)) +
-    geom_point() + 
-    facet_wrap(vars(pos_name), scales = "free")
+plot_hgis_time <- function(data, y_var = normFm, errors = NULL) {
+  y_var <- enquo(y_var)
+  
+  if (missing(errors)) {
+    ggplot(data, aes(cum_acqtime, !!y_var)) +
+      geom_point(aes(color = outlier)) + 
+      facet_wrap(vars(pos_name), scales = "free")
+  } else {
+    errors <- enquo(errors)
+    
+    ggplot(data, aes(cum_acqtime, !!y_var)) +
+      geom_pointrange(aes(ymin = !!y_var - !!errors, ymax = !!y_var + !!errors,
+                         color = outlier)) + 
+      facet_wrap(vars(pos_name), scales = "free")
+  }
 }
 
 
@@ -206,5 +222,5 @@ plot_hgis_time <- function(data) {
 #' @examples
 concCO2 <- function(t, V = 7000, r = 100, flow = 1, initco2 = 1) {
   stopifnot(flow <= r)
-  initco2 * exp(-(r/V)*t) * flow
+initco2 * exp(-(r/V)*t) * flow
 }
