@@ -1,3 +1,9 @@
+```{r echo = FALSE, eval = FALSE}
+# TODO: Add references
+# TODO: Add links to notes
+# TODO: Add photos/diagrams of setup
+```
+
 ## Source parameters
 
 Best currents for the source are around 10uA 12C- or roughly 1/10 of graphite
@@ -56,7 +62,7 @@ Setting flow to the source to 10uL/min provides excess CO2 to source until the h
 
 Targets have shown "pulses" of higher current. Not sure why this is, but I suspect it's either buildup of graphite or other available carbon on the target, or target switching to the "high state" as sometimes happens with solid targets.
 
-First tests with carbonate in vials were hit-or-miss. Problems with capillary clogging and low currents led to poor results for several samples. A pair of NOSAMS2 samples produced good currents, results agreed well, but were about 3% higher than expected Fm.
+First tests with carbonate in vials were hit-or-miss. Problems with capillary clogging and low currents led to poor results for several samples. A pair of NOSAMS2 samples produced good currents, results agreed well, but were about 3% higher than expected Fm. A second set of carbonates produced better currents (~5uA) and better results. Agreement of replicates varied from 3 to 16 permil. Near-modern NOSAMS2 was very close to the consensus value, while C-2 and C-1 were elevated by 2 and 3.6% respectively, indicating that a blank correction is needed.
 
 ## Questions
 
@@ -83,18 +89,24 @@ A: Initial data from identical samples run under similar conditions show standar
 
 ## To do
 
+* Set up for acidification of samples under helium to produce diluted samples
+* Test closed system with vial displacement.
 * More repeated measurements under identical conditions to determine reproducibility
 * Test breakthrough with new open split
 * Establish best helium flow for displacement
 * Fine tune capillary length for best flow to source over pCO2 range of full size sample
 * How to handle < 1 Atm in vials. Backfill?
 * Measure more test samples prepped on Gilson (7mL CO2, Atm pressure)
-* Test higher dillution (5% CO2 in He)
+* Test higher dilution (5% CO2 in He)
 * Define blank, determine whether current-balance correction is needed.
 * Refine normalization and error propagation for data reduction.
 
 
 ## Development
+2021-03-05 - Carbonate test #2. Much better currents and data than previous attempt.
+
+2021-03-01 - Test currents and tuning after source cleaning.
+
 2021-02-12 - Clean source in preparation for next tests. Lots of black residue on CO2 delivery arm. Flushed steel delivery capillary.
 
 2021-02-05 - Tested a series of carbonate samples prepared on Gilson. Tested C-1, TIRI-F, TIRI-I, C-2, and NOSAMS2. Used ~32mg carbonate to produce ~7mL CO2. Problems with clogging and low currents limited quality of tests.
