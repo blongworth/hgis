@@ -4,7 +4,7 @@
 \alias{concCO2}
 \title{Calculate fraction of CO2 in a container vs. time when displaced by another gas}
 \usage{
-concCO2(t, V = 7000, r = 100, flow = 1)
+concCO2(t, V = 7000, r = 100, flow = 1, initco2 = 1)
 }
 \arguments{
 \item{t}{time in same units as r}

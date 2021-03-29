@@ -4,10 +4,14 @@
 \alias{plot_hgis_time}
 \title{Plot of normalized ratio vs time}
 \usage{
-plot_hgis_time(data)
+plot_hgis_time(data, y_var = normFm, errors = NULL)
 }
 \arguments{
 \item{data}{A tibble in format of output from get_hgis_data().}
+
+\item{y_var}{A column to plot against time}
+
+\item{errors}{A column containing errors for y_var}
 }
 \value{
 A ggplot object with norm ratio and current vs time,
