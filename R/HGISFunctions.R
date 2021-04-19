@@ -139,6 +139,7 @@ sum_hgis <- function(data) {
               sd = sd(normFm),
               exterr = normRunExtErr(normFm),
               interr = 1/sqrt(sum(CntTotGT)),
+              merr = pmax(exterr, interr),
               acqtime = sum(Cycles)/10,
               N_acq = n()) 
 }
