@@ -110,7 +110,8 @@ get_hgis_data <- function(file, date) {
     mutate(dil_factor = case_when(str_ends(Sample.Name, "1") ~ 1,
                                  str_starts(Sample.Name, "Dil") ~ 3,
                                  TRUE ~ 0),
-           pos_name = reorder(paste(Pos, Sample.Name, sep = " - "), as.numeric(Pos))) %>% 
+           pos_name = reorder(paste(Pos, Sample.Name, sep = " - "), as.numeric(Pos)),
+           wheel = str_extract(file, "USAMS\\d{6}")) %>% 
     group_by(pos_name) %>% 
     mutate(cum_acqtime = cumsum(Cycles) / 10,
            outlier = ifelse(is.na(removeOutliers(cor1412he)), TRUE, FALSE)) %>% 
@@ -132,13 +133,13 @@ get_hgis_data <- function(file, date) {
 #'
 sum_hgis <- function(data) {
   data %>% 
-    group_by(Pos, Sample.Name, dil_factor) %>%
+    group_by(wheel, Pos, Sample.Name, dil_factor) %>%
     summarise(Cur = mean(he12C),
               Cur.sd = sd(he12C),
               mean = mean(normFm),
               sd = sd(normFm),
               exterr = normRunExtErr(normFm),
-              interr = 1/sqrt(sum(CntTotGT)),
+              interr = mean * (1/sqrt(sum(CntTotGT))), # multiplied internal error by fm, not sure if correct.
               merr = pmax(exterr, interr),
               acqtime = sum(Cycles)/10,
               N_acq = n()) 
