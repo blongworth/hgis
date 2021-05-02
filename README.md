@@ -92,8 +92,8 @@ current.
 The open split interface supplies a helium-CO2 mixture to a split where
 a capillary delivers gas to the source and the rest is vented. The
 current split is a VICI Luer adapter on the outflow side of the dual
-needle. The split has fairly low volume. Testing is needed to determine
-minimum sample flow to avoid atmosphere entering the split.
+needle (Figure 1). The split has fairly low volume. Testing is needed to
+determine minimum sample flow to avoid atmosphere entering the split.
 
 Currently, 250cm of 50um capillary defines flow rate from the open split
 into the source, with a bulkhead connector at the source cage. Precision
@@ -142,6 +142,13 @@ appropriate. Alternatively, vials could be flushed with helium prior to
 acidification, rather than evacuating, leading to some concentration of
 CO2 in He at slightly &gt; 1 ATM.
 
+Testing long runs of dilution of CO2 with displacing He and diluting He
+with CO2 show that the setup is still optimized for low flow to the
+source, even with larger diameter delivery capillaries. There appears to
+be a constriction in the split-source tubing that is keeping flows low.
+Current focus is on the large-sample 7mL method, so this will be
+diagnosed as time allows.
+
 Targets have shown “pulses” of higher current. Not sure why this is, but
 I suspect it’s either buildup of graphite or other available carbon on
 the target, or target switching to the “high state” as sometimes happens
@@ -150,7 +157,23 @@ with solid targets.
 First tests with carbonate in vials were hit-or-miss. Problems with
 capillary clogging and low currents led to poor results for several
 samples. A pair of NOSAMS2 samples produced good currents, results
-agreed well, but were about 3% higher than expected Fm.
+agreed well, but were about 3% higher than expected Fm. A second set of
+carbonates produced better currents (\~5uA) and better results.
+Agreement of replicates varied from 3 to 16 permil. Near-modern NOSAMS2
+was very close to the consensus value, while C-2 and C-1 were elevated
+by 2 and 3.6% respectively, indicating that a blank correction is
+needed.
+
+Two more recent carbonate tests produced stable currents and
+backgrounds. Since sample, target blank, and sample blank currents were
+relatively constant across samples, a large blank correction can be used
+to correct results. Samples from both runs showed a linear relationship
+between difference from expected Fm and Fm of the sample, but in one
+sample set the relationship was positive, and in the other, negative.
+Since the intercept with 0-offset was close to 0 Fm, I think this is a
+problem with normalization, rather than blank correction. Standards run
+at the end of the day are higher than those run at the beginning, which
+may give clues as to what’s going on.
 
 ## Questions
 
@@ -179,6 +202,9 @@ standard deviation of around 1-1.5% for modern samples.
 
 ## To do
 
+-   Set up for acidification of samples under helium to produce diluted
+    samples
+-   Test closed system with vial displacement.
 -   More repeated measurements under identical conditions to determine
     reproducibility
 -   Test breakthrough with new open split
@@ -187,12 +213,27 @@ standard deviation of around 1-1.5% for modern samples.
     of full size sample
 -   How to handle &lt; 1 Atm in vials. Backfill?
 -   Measure more test samples prepped on Gilson (7mL CO2, Atm pressure)
--   Test higher dillution (5% CO2 in He)
+-   Test higher dilution (5% CO2 in He)
 -   Define blank, determine whether current-balance correction is
     needed.
 -   Refine normalization and error propagation for data reduction.
 
 ## Development
+
+2021-04-16 - Carbonate test \#4. Similar test to last Friday, with C-1,
+C-2, and NOSAMS-2. Stable currents and good data.
+
+2021-04-09 - Carbonate test \#3. Good data and stable currents from
+TIRI-F, TIRI-I, and NOSAMS-2.
+
+2021-04-02 - High dilution test \#2.
+
+2021-03-26 - Startup after tank opening and high dilution test.
+
+2021-03-05 - Carbonate test \#2. Much better currents and data than
+previous attempt.
+
+2021-03-01 - Test currents and tuning after source cleaning.
 
 2021-02-12 - Clean source in preparation for next tests. Lots of black
 residue on CO2 delivery arm. Flushed steel delivery capillary.
@@ -264,3 +305,25 @@ currents over time.
 
 2020-09-29 - Starting up HGIS. Load sample wheel. Reterminate
 capillaries at cage wall and open split.
+
+## Figures
+
+![**Figure 1.** Open split. The split is formed by inserting the
+capillary to the source into the Luer adapter and teflon tubing at top
+of image.](doc/images/open_split.jpg)
+
+![**Figure 2.** Gas control. Helium, live CO2 and dead CO2 are
+controlled by regulators at left. The swage plug valve selects live or
+dead CO2. Helium or CO2 is selected with the Valco valve. Flow is
+regulated by a length of 50um capillary between the Valco valve and
+delivery needle.](doc/images/gas_control.jpg)
+
+![**Figure 3.** Sample vial and needle. Standard CO2 or helium is
+admitted using 1/16" stainless tubing, and the mixture from the vial
+exits via an inner needle.](doc/images/vial_needle.jpg)
+
+# Presentations
+
+Slides for a presentation given at SNEAP 2021:
+
+### [SNEAP 2021 Presentation](doc/SNEAP2021/SNEAP2021_HGIS_presentation/SNEAP2021_HGIS_presentation.html)

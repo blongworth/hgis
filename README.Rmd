@@ -46,3 +46,9 @@ for the hybrid gas ion source on USAMS.
 
 ```{r child='summary.Rmd'}
 ```
+
+# Presentations
+
+Slides for a presentation given at SNEAP 2021:
+
+### [SNEAP 2021 Presentation](doc/SNEAP2021/SNEAP2021_HGIS_presentation/SNEAP2021_HGIS_presentation.html)
