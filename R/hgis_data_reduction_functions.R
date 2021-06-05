@@ -63,4 +63,113 @@ doLBCerror <- function(fmmeas, fmblank, fmstd, fmmeaserr, fmblankerr) {
 	fmblankerr ^ 2 * ((fmmeas - fmstd) / fmstd) ^ 2
 }
 
+# 
+#' Summarize HGIS data per target
+#'
+#' @param data A data frame of run data, processed by `get_hgis_data`.
+#' @param remove_outliers If `TRUE`, do not include samples where `outlier == TRUE`.
+#'
+#' @return A data frame of per-sample data.
+#' @export
+#'
+sum_hgis_targets <- function(data, remove_outliers = TRUE) {
+  
+  if (remove_outliers == TRUE) {
+    data <- filter(data, !outlier)
+  }
+  
+  data %>% 
+    group_by(Pos, Sample.Name, Num) %>% 
+    summarize(across(c(ts, le12C, le13C, he12C, he13C, X13.12he, X14.12he, cor1412he, normFm), 
+                     list(mean = mean, sd = sd)),
+              counts = sum(CntTotGT),
+              ext_err = se(cor1412he) * mean(cor1412he),
+              int_err = (1/sqrt(sum(CntTotGT))) * mean(cor1412he), # multiplied internal error by fm, not sure if correct.
+              max_err = pmax(ext_err, int_err)
+             )
+  
+}
+
+
+#' Normalize HGIS data
+#'
+#' @param data A data frame of per-sample data.
+#' @param standards A vector of positions to use for standards. Will use target types in `data` if not provided.
+#'
+#' @return A data frame with normalized per-sample data.
+#' @export
+#'
+norm_hgis <- function(data, standards) {
+  
+  if (!missing(standards)) {
+    data <- data %>% 
+      mutate(Num = case_when(Pos %in% standards ~ "S",
+                             Num == "S" ~ "U",
+                             TRUE ~ Num))
+  }
+  
+  meanstd <- data %>% 
+    filter(Num == "S") %>% 
+    pull(cor1412he_mean) %>% 
+    mean()
+  
+  data %>% 
+    mutate(norm_ratio = norm_gas(cor1412he_mean, meanstd),
+           sig_norm_ratio = max_err # Replace with proper error propagation
+          )
+  
+}
+
+
+#' Blank correct HGIS data
+#'
+#' @param data A data frame of normalized per-sample data.
+#' @param blanks A vector of positions to use for blanks. Will use target types in `data` if not provided.
+#' @param fmstd The expected fraction modern of the normalizing standard.
+#'
+#' @return A data frame with blank corrected fraction modern and error.
+#' @export
+#'
+blank_cor_hgis <- function(data, blanks, fmstd = 1.0398) {
+  
+  if (!missing(blanks)) {
+    data <- data %>% 
+      mutate(Num = case_when(Pos %in% blanks ~ "B",
+                             Num == "B" ~ "U",
+                             TRUE ~ Num))
+  }
+  
+  meanblank <- data %>% 
+    filter(Num == "B") %>% 
+    pull(norm_ratio) %>% 
+    mean()
+  
+  blankerr <- data %>% 
+    filter(Num == "B") %>% 
+    pull(norm_ratio) %>% 
+    amstools::blankErr() # uses SNICSer error floor method
+  
+  data %>% 
+    mutate(fm_corr = doLBC(norm_ratio, meanblank, fmstd),
+           sig_fm_corr = doLBCerr(norm_ratio, meanblank, fmstd, sig_norm_ratio, blankerr)
+          )
+}
+
 # Produce normalized data for wheel per target
+
+
+#' 
+#'
+#' @param data 
+#' @param standards 
+#' @param blanks 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+reduce_hgis <- function(data, standards, blanks) {
+  #Load data
+  
+  
+}

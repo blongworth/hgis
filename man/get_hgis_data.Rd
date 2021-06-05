@@ -4,17 +4,19 @@
 \alias{get_hgis_data}
 \title{Get and process hgis data from results file.}
 \usage{
-get_hgis_data(file, date)
+get_hgis_data(file, date, standards)
 }
 \arguments{
 \item{file}{Path to a NOSAMS format AMS results file.}
 
 \item{date}{A vector of dates to subset from file. All data used if missing.}
+
+\item{standards}{A vector of the wheel postions containing standards}
 }
 \value{
 
 }
 \description{
 Read data file and perform standard munging with amstools::mungeResfile().
-Add dilution factor. Normalize using mean of samples marked as "S".
+Add dilution factor. Normalize using mean of samples marked as "S", or a list of standards.
 }
