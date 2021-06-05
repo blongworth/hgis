@@ -90,20 +90,28 @@ norm_gas <- function(sample, standard, stdrat = 1.0398) {
 #' Get and process hgis data from results file.
 #'
 #' Read data file and perform standard munging with amstools::mungeResfile(). 
-#' Add dilution factor. Normalize using mean of samples marked as "S".
+#' Add dilution factor. Normalize using mean of samples marked as "S", or a list of standards.
 #' 
 #' @param file Path to a NOSAMS format AMS results file.
 #' @param date A vector of dates to subset from file. All data used if missing.
+#' @param standards A vector of the wheel postions containing standards
 #'
 #' @return
 #' @export
 #'
-get_hgis_data <- function(file, date) {
+get_hgis_data <- function(file, date, standards) {
   data <- readResfile(file) %>% 
     mungeResfile() 
   
   if (!missing(date)) {
     data <- filter(data, as.Date(ts) %in% date)
+  }
+  
+  if (!missing(standards)) {
+    data <- data %>% 
+      mutate(Num = case_when(Pos %in% standards ~ "S",
+                             Num == "S" ~ "U",
+                             TRUE ~ Num))
   }
   
   data <- data %>%
@@ -138,7 +146,7 @@ sum_hgis <- function(data) {
               Cur.sd = sd(he12C),
               mean = mean(normFm),
               sd = sd(normFm),
-              exterr = normRunExtErr(normFm),
+              exterr = se(normFm),
               interr = mean * (1/sqrt(sum(CntTotGT))), # multiplied internal error by fm, not sure if correct.
               merr = pmax(exterr, interr),
               acqtime = sum(Cycles)/10,
