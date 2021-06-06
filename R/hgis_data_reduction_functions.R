@@ -80,14 +80,16 @@ sum_hgis_targets <- function(data, remove_outliers = TRUE) {
   
   data %>% 
     group_by(Pos, Sample.Name, Num) %>% 
-    summarize(across(c(ts, le12C, le13C, he12C, he13C, X13.12he, X14.12he, cor1412he, normFm), 
+    summarize(ext_err = se(cor1412he) / mean(cor1412he),
+              int_err = 1/sqrt(sum(CntTotGT)),
+              max_err = pmax(ext_err, int_err),
+              across(c(le12C, le13C, he12C, he13C, X13.12he, X14.12he, cor1412he, normFm), 
                      list(mean = mean, sd = sd),
                      .names = "{ifelse(.fn == 'mean', '', 'sig_')}{.col}"),
+              ts = min(ts),
               counts = sum(CntTotGT),
-              ext_err = se(cor1412he) * mean(cor1412he),
-              int_err = (1/sqrt(sum(CntTotGT))) * mean(cor1412he), # multiplied internal error by fm, not sure if correct.
-              max_err = pmax(ext_err, int_err)
-             )
+              n_runs = n()
+              )
   
 }
 
@@ -116,7 +118,7 @@ norm_hgis <- function(data, standards) {
   
   data %>% 
     mutate(norm_ratio = norm_gas(cor1412he, meanstd),
-           sig_norm_ratio = max_err # Replace with proper error propagation
+           sig_norm_ratio = max_err * norm_ratio # Replace with proper error propagation
           )
   
 }
