@@ -94,7 +94,7 @@ sum_hgis_targets <- function(data, remove_outliers = TRUE) {
   
   data %>% 
     group_by(Pos, Sample.Name, Num) %>% 
-    summarize(ext_err = se(cor1412he) / mean(cor1412he),
+    summarize(ext_err = amstools::se(cor1412he) / mean(cor1412he),
               int_err = 1/sqrt(sum(CntTotGT)),
               max_err = pmax(ext_err, int_err),
               across(c(le12C, le13C, he12C, he13C, X13.12he, X14.12he, cor1412he, normFm), 
@@ -173,8 +173,8 @@ blank_cor_hgis <- function(data, blanks, fmstd = 1.0398) {
     amstools::blankErr() # uses SNICSer error floor method
   
   data %>% 
-    mutate(fm_corr = doLBC(norm_ratio, meanblank, fmstd),
-           sig_fm_corr = doLBCerr(norm_ratio, meanblank, fmstd, sig_norm_ratio, blankerr)
+    mutate(fm_corr = amstools::doLBC(norm_ratio, meanblank, fmstd),
+           sig_fm_corr = amstools::doLBCerr(norm_ratio, meanblank, fmstd, sig_norm_ratio, blankerr)
           )
 }
 
