@@ -1,21 +1,5 @@
 # Functions for HGIS data reduction
 
-
-# Load data
-
-# Calculate per-block fields
-calcRaw <- function(data) {
-	data %>%
-	  mutate(
-      ltcorr = CntTotS - CntTotH,
-	    cor1412 = doCor1412(he1412, ltcorr, he1312),
-	    sig1412 = ,
-	    d13c = calcd13c(he1312)
-	  )
-}
-            
-# Trim bad blocks
-
 # Add 13C and deadtime correction
 doCor1412 <- function(he1412, ltcorr, he1312) {
 	he1412 / ltcorr / he1312 ^ 2
@@ -48,9 +32,40 @@ norm1412 <- function(cor1412, meanstd) {
   cor1412/meanstd
 }
 
+#' Normalize a gas target run using the measured and consensus value of a standard
+#'
+#' @param sample Ratio to be normalized.
+#' @param standard Measured ratio of the standard.
+#' @param stdrat Consensus value of the standard.
+#'
+#' @return The normalized ratio of the sample.
+#' @export
+#'
+norm_gas <- function(sample, standard, stdrat = 1.0398) {
+  sample/standard * stdrat
+}
+
+
 # Propagate normalization error
 
+#' Calculate normalization error
+#'
+#' @param sample The normalized Fm of the sample
+#' @param standard The normalized Fm of the standard
+#' @param sample_err The error of the sample
+#' @param standard_err The error of the standard
+#'
+#' @return The propagated error of the normalized sample
+#' @export
+#'
+norm_err <- function(sample, standard, sample_err, standard_err) {
+  sqrt(sample_err^2/sample^2 + standard_err^2/standard^2)
+}
+
+
+
 ## Blank correction
+
 # Apply large blank
 doLBC <- function(fmmeas, fmblank, fmstd) {
 	fmmeas - fmblank * (fmstd - fmmeas) / fmstd
@@ -58,9 +73,8 @@ doLBC <- function(fmmeas, fmblank, fmstd) {
 
 # Propagate large blank error
 doLBCerror <- function(fmmeas, fmblank, fmstd, fmmeaserr, fmblankerr) {
-	# why no fmstderr?
-	fmmeaserr ^ 2 * (1 + fmblank / fmstd) ^ 2 +
-	fmblankerr ^ 2 * ((fmmeas - fmstd) / fmstd) ^ 2
+	sqrt(fmmeaserr ^ 2 * (1 + fmblank / fmstd) ^ 2 +
+	fmblankerr ^ 2 * ((fmmeas - fmstd) / fmstd) ^ 2)
 }
 
 # 
@@ -116,9 +130,15 @@ norm_hgis <- function(data, standards) {
     pull(cor1412he) %>% 
     mean()
   
+  # Using sd of standards as standard error. Should probably compare to per-standard error
+  stderr <- data %>% 
+    filter(Num == "S") %>% 
+    pull(cor1412he) %>% 
+    sd()
+  
   data %>% 
     mutate(norm_ratio = norm_gas(cor1412he, meanstd),
-           sig_norm_ratio = max_err * norm_ratio # Replace with proper error propagation
+           sig_norm_ratio = norm_err(cor1412he, meanstd, max_err, stderr) * norm_ratio # Replace with proper error propagation
           )
   
 }
