@@ -111,3 +111,19 @@ sum_hgis <- function(data) {
 }
 
 
+#' Compare agreement of replicate samples
+#'
+#' @param data 
+#'
+#' @return
+#' @export
+#'
+compare_replicates <- function(data) {
+  data %>% 
+    mutate(Name = str_remove(Sample.Name, "_.$")) %>% 
+    group_by(Name) %>% 
+    filter(n() > 1) %>% 
+    summarize(across(c(he12C, fm_corr, sig_fm_corr),
+                     list(mean = mean, sd = sd)),
+              N = n()) 
+}
