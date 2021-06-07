@@ -112,6 +112,8 @@ sum_hgis <- function(data) {
 
 
 #' Compare agreement of replicate samples
+#' 
+#' Will use normalized data and error if blank corrected data unavailable.
 #'
 #' @param data 
 #'
@@ -119,11 +121,20 @@ sum_hgis <- function(data) {
 #' @export
 #'
 compare_replicates <- function(data) {
+  
+  # Use normalized data if BC data is not available
+  if ("fm_corr" %in% names(data)) {
+    cols <- c("he12C", "fm_corr", "sig_fm_corr")
+  } else {
+    cols <- c("he12C", "norm_ratio", "sig_norm_ratio")
+    warning("fm_corr unavailable, using norm_ratio for comparison")
+  }
+  
   data %>% 
-    mutate(Name = str_remove(Sample.Name, "_.$")) %>% 
-    group_by(Name) %>% 
+    mutate(Name = str_remove(Sample.Name, "_.*$")) %>% 
+    group_by(Name, rec_num) %>% 
     filter(n() > 1) %>% 
-    summarize(across(c(he12C, fm_corr, sig_fm_corr),
+    summarize(across(cols,
                      list(mean = mean, sd = sd)),
               N = n()) 
 }

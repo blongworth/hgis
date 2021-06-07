@@ -13,5 +13,5 @@ compare_replicates(data)
 
 }
 \description{
-Compare agreement of replicate samples
+Will use normalized data and error if blank corrected data unavailable.
 }
