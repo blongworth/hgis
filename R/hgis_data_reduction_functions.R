@@ -82,17 +82,20 @@ doLBCerror <- function(fmmeas, fmblank, fmstd, fmmeaserr, fmblankerr) {
 #'
 #' @param data A data frame of run data, processed by `get_hgis_data`.
 #' @param remove_outliers If `TRUE`, do not include samples where `outlier == TRUE`.
+#' @param get_consensus If `TRUE`, get and add consensus values from NOSAMS DB.
 #'
 #' @return A data frame of per-sample data.
 #' @export
 #'
-sum_hgis_targets <- function(data, remove_outliers = TRUE) {
+sum_hgis_targets <- function(data, remove_outliers = TRUE, get_consensus = TRUE) {
   
   if (remove_outliers == TRUE) {
     data <- filter(data, !outlier)
   }
   
-  data %>% 
+  
+
+data_sum <- data %>% 
     group_by(Pos, Sample.Name, Num) %>% 
     summarize(ext_err = amstools::se(cor1412he) / mean(cor1412he),
               int_err = 1/sqrt(sum(CntTotGT)),
@@ -103,7 +106,25 @@ sum_hgis_targets <- function(data, remove_outliers = TRUE) {
               ts = min(ts),
               counts = sum(CntTotGT),
               n_runs = n()
-              )
+              ) %>% 
+    mutate(rec_num = case_when(str_starts(Sample.Name, "LiveGas") ~ 101730,
+                               str_starts(Sample.Name, "C-?1") ~ 83028,
+                               str_starts(Sample.Name, "TIRI-F") ~ 2138,
+                               str_starts(Sample.Name, "TIRI-I") ~ 17185,
+                               str_starts(Sample.Name, "C-?2") ~ 1082,
+                               str_starts(Sample.Name, "NOSAMS-?2") ~ 38809,
+                               str_starts(Sample.Name, "DeadGas") ~ 72446))
+    
+  if (get_consensus == TRUE) {
+    std <- amstools::getStdTable()
+    data_sum %>%  
+      left_join(select(std, rec_num, fm_consensus), by = "rec_num") %>% 
+      mutate(fm_consensus = case_when(rec_num == 101730 ~ 1.0398,
+                                      rec_num == 72446 ~ 0.0013,
+                                      TRUE ~ fm_consensus))
+  } else {
+    data_sum
+  }
   
 }
 
@@ -190,7 +211,6 @@ blank_cor_hgis <- function(data, blanks, fmstd = 1.0398) {
 #' @return
 #' @export
 #'
-#' @examples
 reduce_hgis <- function(data, standards, blanks) {
   #Load data
   
