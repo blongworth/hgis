@@ -41,6 +41,36 @@ hgis_eff <- function(ulm, uA, cs = 3) {
 }
 
 
+#' Read SNICS results file
+#'
+#' @param file A path to a SNICS results file
+#'
+#' @return A tibble of results for a wheel
+#' @export
+#'
+read_results <- function(file) {
+  res_cols <- cols(
+    runtime = col_datetime(format = "%a %b %d %H:%M:%S %Y"),
+    pos = col_integer(),
+    meas = col_integer(),
+    sample_name = col_character(),
+    sample_type = col_character(),
+    cycles = col_double(),
+    le12C = col_double(),
+    le13C = col_double(),
+    he12C = col_double(),
+    he13C = col_double(),
+    CntTotH = col_integer(),
+    CntTotS = col_integer(),
+    CntTotGT = col_integer(),
+    he13_12 = col_double(),
+    he14_12 = col_double()
+  )
+  
+  read_tsv(file, col_names = names(res_cols$cols), col_types = res_cols, skip = 5, comment = "=")
+}
+
+
 #' Get and process hgis data from results file.
 #'
 #' Read data file and perform standard munging with amstools::mungeResfile(). 
