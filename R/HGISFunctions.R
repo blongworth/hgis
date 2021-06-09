@@ -48,7 +48,7 @@ hgis_eff <- function(ulm, uA, cs = 3) {
 #' @return A tibble of results for a wheel
 #' @export
 #'
-read_results <- function(file) {
+read_results_file <- function(file) {
   res_cols <- cols(
     runtime = col_datetime(format = "%a %b %d %H:%M:%S %Y"),
     pos = col_integer(),
@@ -70,7 +70,64 @@ read_results <- function(file) {
   read_tsv(file, col_names = names(res_cols$cols), col_types = res_cols, skip = 5, comment = "=")
 }
 
+process_results_file <- function(data) {
+  data %>%
+    mutate(corr_14_12 = he14_12/he13_12^2,
+	   sig_14_12 = 1/sqrt(CntTotGT),
+	   ltcorr = cycles/10)
+}
 
+
+#' Get and process hgis data from results file.
+#'
+#' Read data file and perform standard munging. 
+#' Normalize using mean of samples marked as "S", or a list of standards.
+#' 
+#' @param file Path to a NOSAMS format AMS results file.
+#' @param date A vector of dates to subset from file. All data used if missing.
+#' @param standards A vector of the wheel positions containing standards
+#'
+#' @return
+#' @export
+#'
+process_hgis_results <- function(file, date, standards) {
+  data <- read_results_file(file) %>% 
+    process_results_file() 
+
+  if (!missing(date)) {
+    data <- filter(data, as.Date(runtime) %in% date)
+  }
+  
+  if (!missing(standards)) {
+    data <- data %>% 
+      mutate(sample_type = case_when(pos %in% standards ~ "S",
+                             sample_type == "S" ~ "U",
+                             TRUE ~ sample_type))
+  }
+  
+  data <- data %>%
+    mutate(pos_name = reorder(paste(pos, sample_name, sep = " - "), pos),
+           wheel = str_extract(file, "USAMS\\d{6}")) %>% 
+    group_by(pos, sample_name) %>% 
+    mutate(ok_calc = !ifelse(is.na(removeOutliers(corr_14_12)), TRUE, FALSE)) %>% 
+    ungroup()
+    
+  meanstd <- data %>% 
+    filter(sample_type == "S" & ok_calc) %>% 
+    pull(corr_14_12) %>% 
+    mean()
+  
+  mean13cstd <- data %>%
+    filter(sample_type == "S" & ok_calc) %>% 
+    pull(he13_12) %>% 
+    mean()
+
+  data %>%
+    mutate(norm_ratio = norm_gas(corr_14_12, meanstd)) #,
+          # norm_del13c = calc_del13c(he13_12, mean13cstd))
+}
+  
+	   
 #' Get and process hgis data from results file.
 #'
 #' Read data file and perform standard munging with amstools::mungeResfile(). 
