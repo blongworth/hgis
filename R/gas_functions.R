@@ -93,7 +93,6 @@ hgis_eff <- function(ulm, uA, cs = 3) {
 #' @return Fractional concentration of CO2 in vessel (and outflow).
 #' @export
 #'
-#' @examples
 concCO2 <- function(t, V = 7000, r = 100, flow = 1, initco2 = 1) {
   stopifnot(flow <= r)
 initco2 * exp(-(r/V)*t) * flow
