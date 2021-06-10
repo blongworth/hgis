@@ -4,12 +4,10 @@
 # Create SQLite database for HGIS
 
 
-library(DBI)
-library(here)
 
 create_hgis_db <- function() {
   # Create database
-  hgisdb <- dbConnect(RSQLite::SQLite(), here("data/hgis.sqlite"))
+  hgisdb <- DBI::dbConnect(RSQLite::SQLite(), here::here("data/hgis.sqlite"))
   
   # Set up tables
   schema <- c("CREATE TABLE hgis_raw (
@@ -33,11 +31,12 @@ create_hgis_db <- function() {
                sig_norm_del13c REAL
              );",
               
-             "CREATE TABLE hgis_sample (
+             "CREATE TABLE hgis_samples (
                sample_id INTEGER PRIMARY KEY,
                rec_num INTEGER,
                name TEXT,
                carbonate_mass REAL
+               helium_added REAL
              );",
               
              "CREATE TABLE hgis_results (
@@ -76,9 +75,26 @@ create_hgis_db <- function() {
                cap_id REAL
              );")
   
-  walk(schema, function(x) dbExecute(hgisdb, x))
+  purrr::walk(schema, function(x) DBI::dbExecute(hgisdb, x))
 }
 
+
+#' Insert a table of samples into HGIS DB
+#'
+#' @param data A dataframe of sample info in `hgis_samples` format.
+#' @param con A DBI connection object for the HGIS DB
+#'
+#' @return
+#' @export
+#'
+insert_samples <- function(data, con = hgisdb) {
+  
+  next_sample_id <- dbGetQuery(con, "SELECT MAX(sample_id) FROM hgis_samples") %>% 
+    pull(sample_id) + 1
+  
+  data$sample_id <- next_sample_id:(nrow(data) + next_sample_id)
+  dbAppendTable(con, "hgis_samples", data)
+}
 
 # Insert raw data
 
