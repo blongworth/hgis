@@ -123,8 +123,8 @@ process_hgis_results <- function(file, date, standards) {
     mean()
 
   data %>%
-    mutate(norm_ratio = norm_gas(corr_14_12, meanstd)) #,
-          # norm_del13c = calc_del13c(he13_12, mean13cstd))
+    mutate(norm_ratio = norm_gas(corr_14_12, meanstd),
+           norm_del13c = calc_d13c(he13_12))
 }
   
 	   
