@@ -70,6 +70,13 @@ read_results_file <- function(file) {
   read_tsv(file, col_names = names(res_cols$cols), col_types = res_cols, skip = 5, comment = "=")
 }
 
+#' Process SNICS Results file
+#'
+#' @param data A dataframe of SNICS results in `read_results_file` format.
+#'
+#' @return
+#' @export
+#'
 process_results_file <- function(data) {
   data %>%
     mutate(corr_14_12 = he14_12/he13_12^2,

@@ -12,8 +12,14 @@ RelErrSq <- (CntTotH - CntTotS) * CntTotH ^ 2 / CntTotS ^ 4 +
 cor1412 * RelErrSq ^ 0.5
 }
 
-# Calculate d13C
-calcd13c <- function(he1312) {
+#' Calculate d13C
+#'
+#' @param he1312 
+#'
+#' @return
+#' @export
+#'
+calc_d13c <- function(he1312) {
 	1000 * (he1312 / 1.12372 -1)
 }
 
@@ -46,22 +52,6 @@ norm_gas <- function(sample, standard, stdrat = 1.0398) {
 }
 
 
-# Propagate normalization error
-
-#' Calculate normalization error
-#'
-#' @param sample The normalized Fm of the sample
-#' @param standard The normalized Fm of the standard
-#' @param sample_err The error of the sample
-#' @param standard_err The error of the standard
-#'
-#' @return The propagated error of the normalized sample
-#' @export
-#'
-norm_err <- function(sample, standard, sample_err, standard_err) {
-  sqrt(sample_err^2/sample^2 + standard_err^2/standard^2)
-}
-
 
 
 ## Blank correction
@@ -80,8 +70,8 @@ doLBCerror <- function(fmmeas, fmblank, fmstd, fmmeaserr, fmblankerr) {
 # 
 #' Summarize HGIS data per target
 #'
-#' @param data A data frame of run data, processed by `get_hgis_data`.
-#' @param remove_outliers If `TRUE`, do not include samples where `outlier == TRUE`.
+#' @param data A data frame of run data, processed by `process_hgis_results`.
+#' @param remove_outliers If `TRUE`, do not include samples where `ok_calc == FALSE`.
 #' @param get_consensus If `TRUE`, get and add consensus values from NOSAMS DB.
 #'
 #' @return A data frame of per-sample data.
@@ -90,30 +80,30 @@ doLBCerror <- function(fmmeas, fmblank, fmstd, fmmeaserr, fmblankerr) {
 sum_hgis_targets <- function(data, remove_outliers = TRUE, get_consensus = TRUE) {
   
   if (remove_outliers == TRUE) {
-    data <- filter(data, !outlier)
+    data <- filter(data, ok_calc)
   }
-  
-  
 
-data_sum <- data %>% 
-    group_by(Pos, Sample.Name, Num) %>% 
-    summarize(ext_err = amstools::se(cor1412he) / mean(cor1412he),
+  data_sum <- data %>% 
+    group_by(pos, sample_name, sample_type) %>% 
+    summarize(ext_err = amstools::se(corr_14_12),
               int_err = 1/sqrt(sum(CntTotGT)),
               max_err = pmax(ext_err, int_err),
-              across(c(le12C, le13C, he12C, he13C, X13.12he, X14.12he, cor1412he, normFm), 
+              across(c(le12C, le13C, he12C, he13C,
+                       he13_12, he14_12, corr_14_12, 
+                       norm_ratio, norm_del13c), 
                      list(mean = mean, sd = sd),
                      .names = "{ifelse(.fn == 'mean', '', 'sig_')}{.col}"),
-              ts = min(ts),
+              runtime = min(runtime),
               counts = sum(CntTotGT),
               n_runs = n()
               ) %>% 
-    mutate(rec_num = case_when(str_starts(Sample.Name, "LiveGas") ~ 101730,
-                               str_starts(Sample.Name, "C-?1") ~ 83028,
-                               str_starts(Sample.Name, "TIRI-F") ~ 2138,
-                               str_starts(Sample.Name, "TIRI-I") ~ 17185,
-                               str_starts(Sample.Name, "C-?2") ~ 1082,
-                               str_starts(Sample.Name, "NOSAMS-?2") ~ 38809,
-                               str_starts(Sample.Name, "DeadGas") ~ 72446))
+    mutate(rec_num = case_when(str_starts(sample_name, "LiveGas") ~ 101730,
+                               str_starts(sample_name, "C-?1") ~ 83028,
+                               str_starts(sample_name, "TIRI-F") ~ 2138,
+                               str_starts(sample_name, "TIRI-I") ~ 17185,
+                               str_starts(sample_name, "C-?2") ~ 1082,
+                               str_starts(sample_name, "NOSAMS-?2") ~ 38809,
+                               str_starts(sample_name, "DeadGas") ~ 72446))
     
   if (get_consensus == TRUE) {
     std <- amstools::getStdTable()
@@ -129,6 +119,24 @@ data_sum <- data %>%
 }
 
 
+#' Calculate normalization error
+#'
+#' @param sample The normalized Fm of the sample
+#' @param standard The normalized Fm of the standard
+#' @param sample_err The error of the sample
+#' @param standard_err The error of the standard
+#'
+#' @return The propagated error of the normalized sample
+#' @export
+#'
+norm_err <- function(sample, standard, sample_err, standard_err, 
+                     stdrat = 1.0398, stdrat_err = 0.0006) {
+  sqrt(sample_err^2/sample^2 + 
+       standard_err^2/standard^2 + 
+       stdrat_err^2/stdrat^2)
+}
+
+
 #' Normalize HGIS data
 #'
 #' @param data A data frame of per-sample data.
@@ -141,25 +149,25 @@ norm_hgis <- function(data, standards) {
   
   if (!missing(standards)) {
     data <- data %>% 
-      mutate(Num = case_when(Pos %in% standards ~ "S",
-                             Num == "S" ~ "U",
-                             TRUE ~ Num))
+      mutate(Num = case_when(pos %in% standards ~ "S",
+                             sample_type == "S" ~ "U",
+                             TRUE ~ sample_type))
   }
   
   meanstd <- data %>% 
-    filter(Num == "S") %>% 
-    pull(cor1412he) %>% 
+    filter(sample_type == "S") %>% 
+    pull(corr_14_12) %>% 
     mean()
   
-  # Using sd of standards as standard error. Should probably compare to per-standard error
+  # Using se of standards as standard error. Should probably compare to per-standard error
   stderr <- data %>% 
-    filter(Num == "S") %>% 
-    pull(cor1412he) %>% 
-    sd()
+    filter(sample_type == "S") %>% 
+    pull(corr_14_12) %>% 
+    se()
   
   data %>% 
-    mutate(norm_ratio = norm_gas(cor1412he, meanstd),
-           sig_norm_ratio = norm_err(cor1412he, meanstd, max_err, stderr) * norm_ratio # Replace with proper error propagation
+    mutate(norm_ratio = norm_gas(corr_14_12, meanstd),
+           sig_norm_ratio = norm_err(corr_14_12, meanstd, max_err, stderr) * norm_ratio 
           )
   
 }
@@ -178,18 +186,18 @@ blank_cor_hgis <- function(data, blanks, fmstd = 1.0398) {
   
   if (!missing(blanks)) {
     data <- data %>% 
-      mutate(Num = case_when(Pos %in% blanks ~ "B",
-                             Num == "B" ~ "U",
-                             TRUE ~ Num))
+      mutate(sample_type = case_when(pos %in% blanks ~ "B",
+                             sample_type == "B" ~ "U",
+                             TRUE ~ sample_type ))
   }
   
   meanblank <- data %>% 
-    filter(Num == "B") %>% 
+    filter(sample_type == "B") %>% 
     pull(norm_ratio) %>% 
     mean()
   
   blankerr <- data %>% 
-    filter(Num == "B") %>% 
+    filter(sample_type == "B") %>% 
     pull(norm_ratio) %>% 
     amstools::blankErr() # uses SNICSer error floor method
   
@@ -202,17 +210,28 @@ blank_cor_hgis <- function(data, blanks, fmstd = 1.0398) {
 # Produce normalized data for wheel per target
 
 
+#' Reduce HGIS data from an AMS results file
 #' 
+#'  Steps:
+#'  1. Load data
+#'  2. Process raw data.
+#'  3. Insert raw data into DB
+#'  4. Reduce data
+#'  5. Normalize
+#'  6. Blank Correct
+#'  7. Insert results into DB
 #'
-#' @param data 
-#' @param standards 
-#' @param blanks 
+#' @param file A SNICS results file
+#' @param date Date sample run if analysing a specific day
+#' @param standards A vector of standard positions.
+#' @param blanks A vector of blank positions.
 #'
-#' @return
+#' @return A dataframe of results.
 #' @export
 #'
-reduce_hgis <- function(data, standards, blanks) {
+reduce_hgis <- function(file, date, standards, blanks) {
   #Load data
+  
   
   
 }
