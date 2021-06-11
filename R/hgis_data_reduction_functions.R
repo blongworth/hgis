@@ -85,17 +85,16 @@ sum_hgis_targets <- function(data, remove_outliers = TRUE, get_consensus = TRUE)
 
   data_sum <- data %>% 
     group_by(pos, sample_name, sample_type) %>% 
-    summarize(ext_err = amstools::se(corr_14_12),
-              int_err = 1/sqrt(sum(CntTotGT)),
+    summarize(runtime = min(runtime),
+              counts = sum(CntTotGT),
+              n_runs = n(),
+              ext_err = amstools::se(corr_14_12),
+              int_err = 1/sqrt(counts) * mean(corr_14_12),
               max_err = pmax(ext_err, int_err),
               across(c(le12C, le13C, he12C, he13C,
-                       he13_12, he14_12, corr_14_12, 
-                       norm_ratio, norm_del13c), 
+                       he13_12, he14_12, corr_14_12), 
                      list(mean = mean, sd = sd),
                      .names = "{ifelse(.fn == 'mean', '', 'sig_')}{.col}"),
-              runtime = min(runtime),
-              counts = sum(CntTotGT),
-              n_runs = n()
               ) %>% 
     mutate(rec_num = case_when(str_starts(sample_name, "LiveGas") ~ 101730,
                                str_starts(sample_name, "C-?1") ~ 83028,
