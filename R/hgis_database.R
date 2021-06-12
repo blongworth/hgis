@@ -11,7 +11,7 @@ create_hgis_db <- function() {
   
   # Set up tables
   schema <- c("CREATE TABLE hgis_raw (
-               runtime TEXT NOT NULL,
+               runtime TEXT PRIMARY_KEY,
                sample_id INTEGER,
                wheel_pos_id INTEGER,
                ok_calc INTEGER NOT NULL,
@@ -24,7 +24,7 @@ create_hgis_db <- function() {
                he13_12 REAL,
                corr_14_12 REAL,
                sig_14_12 REAL,
-               ltcorr REAL,
+               corr_lt REAL,
                norm_ratio REAL,
                sig_norm_ratio REAL,
                norm_del13c REAL,
@@ -88,21 +88,20 @@ create_hgis_db <- function() {
 #' @export
 #'
 insert_samples <- function(data, con = hgisdb) {
-  
-  next_sample_id <- dbGetQuery(con, "SELECT MAX(sample_id) FROM hgis_samples") %>% 
-    pull(sample_id) + 1
-  
-  data$sample_id <- next_sample_id:(nrow(data) + next_sample_id)
   dbAppendTable(con, "hgis_samples", data)
 }
 
 # Insert raw data
 
 format_insert <- function(data) {
+}
+
+insert_raw <- function(data, con = hgisdb) {
+  # Format and select fields
   data <- data %>% 
-    mutate(runtime = as.character(ts),
-           ok_calc = !as.numeric(outlier),
-           ltcorr = Cycles/10,
+    mutate(#runtime = as.character(ts),
+           ok_calc = as.numeric(ok_calc),
+           corr_lt = Cycles/10,
            sig_norm_ratio = ce/normFm,
            le12c = le12C * 1E-6,
            he12c = he12C * 1E-6) %>% 
@@ -111,9 +110,7 @@ format_insert <- function(data) {
            he13c = he13C, cnt14c = CntTotGT, he13_12 = X13.12he,
            corr_14_12 = cor1412he, sig_14_12 = ce, ltcorr,
            norm_ratio = normFm, sig_norm_ratio)
-}
-
-insert_raw <- function(data, con = hgisdb) {
+  # Insert data
   dbAppendTable(con, "hgis_raw", data)
 }
 
