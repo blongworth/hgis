@@ -4,7 +4,14 @@
 \alias{norm_err}
 \title{Calculate normalization error}
 \usage{
-norm_err(sample, standard, sample_err, standard_err)
+norm_err(
+  sample,
+  standard,
+  sample_err,
+  standard_err,
+  stdrat = 1.0398,
+  stdrat_err = 6e-04
+)
 }
 \arguments{
 \item{sample}{The normalized Fm of the sample}

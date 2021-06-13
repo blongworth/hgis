@@ -4,7 +4,7 @@
 \alias{plot_hgis_time}
 \title{Plot of HGIS data vs time}
 \usage{
-plot_hgis_time(data, y_var = normFm, errors = NULL)
+plot_hgis_time(data, y_var = normFm, errors = NULL, outlier)
 }
 \arguments{
 \item{data}{A tibble in format of output from get_hgis_data().}

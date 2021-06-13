@@ -7,9 +7,9 @@
 sum_hgis_targets(data, remove_outliers = TRUE, get_consensus = TRUE)
 }
 \arguments{
-\item{data}{A data frame of run data, processed by \code{get_hgis_data}.}
+\item{data}{A data frame of run data, processed by \code{process_hgis_results}.}
 
-\item{remove_outliers}{If \code{TRUE}, do not include samples where \code{outlier == TRUE}.}
+\item{remove_outliers}{If \code{TRUE}, do not include samples where \code{ok_calc == FALSE}.}
 
 \item{get_consensus}{If \code{TRUE}, get and add consensus values from NOSAMS DB.}
 }

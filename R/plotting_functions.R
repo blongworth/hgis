@@ -15,8 +15,12 @@
 #' 
 #' @export
 #'
-plot_hgis_time <- function(data, y_var = normFm, errors = NULL) {
+plot_hgis_time <- function(data, y_var = normFm, errors = NULL, outlier) {
   y_var <- enquo(y_var)
+  
+  if (!("cum_acqtime" %in% names(data))) {
+    data <- mutate(data, cum_acqtime = cumsum(cycles) / 10)
+  }
   
   if (missing(errors)) {
     ggplot(data, aes(cum_acqtime, !!y_var)) +
@@ -74,7 +78,7 @@ plot_hgis <- function(data) {
 #' @export
 #'
 plot_hgis_summary <- function(data) {
-  ggplot(data, aes(Sample.Name, fm_corr)) +
+  ggplot(data, aes(sample_name, fm_corr)) +
     geom_pointrange(aes(ymin = fm_corr - sig_fm_corr, ymax = fm_corr + sig_fm_corr),
                     size = 0.1) + 
     theme(axis.text.x = element_text(angle = 45, hjust=1)) +
