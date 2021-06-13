@@ -229,8 +229,12 @@ blank_cor_hgis <- function(data, blanks, fmstd = 1.0398) {
 #' @export
 #'
 reduce_hgis <- function(file, date, standards, blanks) {
-  #Load data
+  df <- process_hgis_results(file, date, standards)
   
+  df_sum <- df %>% 
+    sum_hgis_targets() %>% 
+    norm_hgis() %>% 
+    blank_cor_hgis()
   
-  
+  list(raw = df, results = df_sum)
 }
