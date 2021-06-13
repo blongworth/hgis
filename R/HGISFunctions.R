@@ -67,21 +67,10 @@ read_results_file <- function(file) {
     he14_12 = col_double()
   )
   
-  read_tsv(file, col_names = names(res_cols$cols), col_types = res_cols, skip = 5, comment = "=")
-}
-
-#' Process SNICS Results file
-#'
-#' @param data A dataframe of SNICS results in `read_results_file` format.
-#'
-#' @return
-#' @export
-#'
-process_results_file <- function(data) {
-  data %>%
+  read_tsv(file, col_names = names(res_cols$cols), col_types = res_cols, skip = 5, comment = "=") %>%
     mutate(corr_14_12 = he14_12/he13_12^2,
 	   sig_14_12 = 1/sqrt(CntTotGT),
-	   ltcorr = cycles/10)
+	   corr_lt = cycles/10)
 }
 
 
@@ -98,8 +87,7 @@ process_results_file <- function(data) {
 #' @export
 #'
 process_hgis_results <- function(file, date, standards) {
-  data <- read_results_file(file) %>% 
-    process_results_file() 
+  data <- read_results_file(file)
 
   if (!missing(date)) {
     data <- filter(data, as.Date(runtime) %in% date)
@@ -131,6 +119,7 @@ process_hgis_results <- function(file, date, standards) {
 
   data %>%
     mutate(norm_ratio = norm_gas(corr_14_12, meanstd),
+           sig_norm_ratio = sig_14_12 * norm_ratio,
            norm_del13c = calc_d13c(he13_12))
 }
   
@@ -225,7 +214,7 @@ compare_replicates <- function(data) {
   }
   
   data %>% 
-    mutate(Name = str_remove(Sample.Name, "_.*$")) %>% 
+    mutate(Name = str_remove(sample_name, "_.*$")) %>% 
     group_by(Name, rec_num) %>% 
     filter(n() > 1) %>% 
     summarize(across(cols,
