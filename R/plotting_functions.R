@@ -19,7 +19,9 @@ plot_hgis_time <- function(data, y_var = normFm, errors = NULL, outlier) {
   y_var <- enquo(y_var)
   
   if (!("cum_acqtime" %in% names(data))) {
-    data <- mutate(data, cum_acqtime = cumsum(cycles) / 10)
+    data <- data %>% 
+      group_by(sample_name, pos) %>% 
+      mutate(cum_acqtime = cumsum(cycles) / 10)
   }
   
   if (missing(errors)) {
@@ -32,7 +34,10 @@ plot_hgis_time <- function(data, y_var = normFm, errors = NULL, outlier) {
     ggplot(data, aes(cum_acqtime, !!y_var)) +
       geom_pointrange(aes(ymin = !!y_var - !!errors, ymax = !!y_var + !!errors,
                          color = outlier), size = .2) + 
-      facet_wrap(vars(pos_name), scales = "free")
+      facet_wrap(vars(pos_name), scales = "free") +
+      labs(title = paste(as_label(y_var), "by target"),
+           x = "Time (s)",
+           y = as_label(y_var))
   }
 }
 
