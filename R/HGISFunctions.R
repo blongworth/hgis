@@ -86,14 +86,14 @@ read_results_file <- function(file) {
 #' @return
 #' @export
 #'
-process_hgis_results <- function(file, date, standards) {
+process_hgis_results <- function(file, date = NULL, standards = NULL) {
   data <- read_results_file(file)
 
-  if (!missing(date)) {
+  if (!is.null(date)) {
     data <- filter(data, as.Date(runtime) %in% date)
   }
   
-  if (!missing(standards)) {
+  if (!is.null(standards)) {
     data <- data %>% 
       mutate(sample_type = case_when(pos %in% standards ~ "S",
                              sample_type == "S" ~ "U",
@@ -136,15 +136,15 @@ process_hgis_results <- function(file, date, standards) {
 #' @return
 #' @export
 #'
-get_hgis_data <- function(file, date, standards) {
+get_hgis_data <- function(file, date = NULL, standards = NULL) {
   data <- readResfile(file) %>% 
     mungeResfile() 
   
-  if (!missing(date)) {
+  if (!is.null(date)) {
     data <- filter(data, as.Date(ts) %in% date)
   }
   
-  if (!missing(standards)) {
+  if (!is.null(standards)) {
     data <- data %>% 
       mutate(Num = case_when(Pos %in% standards ~ "S",
                              Num == "S" ~ "U",

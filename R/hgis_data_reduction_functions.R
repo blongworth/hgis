@@ -144,9 +144,9 @@ norm_err <- function(sample, standard, sample_err, standard_err,
 #' @return A data frame with normalized per-sample data.
 #' @export
 #'
-norm_hgis <- function(data, standards) {
+norm_hgis <- function(data, standards = NULL) {
   
-  if (!missing(standards)) {
+  if (!is.null(standards)) {
     data <- data %>% 
       mutate(Num = case_when(pos %in% standards ~ "S",
                              sample_type == "S" ~ "U",
@@ -181,9 +181,9 @@ norm_hgis <- function(data, standards) {
 #' @return A data frame with blank corrected fraction modern and error.
 #' @export
 #'
-blank_cor_hgis <- function(data, blanks, fmstd = 1.0398) {
+blank_cor_hgis <- function(data, blanks = NULL, fmstd = 1.0398) {
   
-  if (!missing(blanks)) {
+  if (!is.null(blanks)) {
     data <- data %>% 
       mutate(sample_type = case_when(pos %in% blanks ~ "B",
                              sample_type == "B" ~ "U",
