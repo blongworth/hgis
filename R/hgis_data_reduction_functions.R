@@ -84,7 +84,7 @@ sum_hgis_targets <- function(data, remove_outliers = TRUE, get_consensus = TRUE)
   }
 
   data_sum <- data %>% 
-    group_by(pos, sample_name, sample_type) %>% 
+    group_by(pos, sample_name, sample_type, wheel) %>% 
     summarize(runtime = min(runtime),
               counts = sum(CntTotGT),
               n_runs = n(),
@@ -228,13 +228,13 @@ blank_cor_hgis <- function(data, blanks = NULL, fmstd = 1.0398) {
 #' @return A dataframe of results.
 #' @export
 #'
-reduce_hgis <- function(file, date, standards, blanks) {
+reduce_hgis <- function(file, date = NULL, standards = NULL, blanks = NULL, remove_outliers = TRUE, get_consensus = TRUE) {
   df <- process_hgis_results(file, date, standards)
   
   df_sum <- df %>% 
-    sum_hgis_targets() %>% 
-    norm_hgis() %>% 
-    blank_cor_hgis()
+    sum_hgis_targets(remove_outliers, get_consensus) %>% 
+    norm_hgis(standards) %>% 
+    blank_cor_hgis(blanks)
   
   list(raw = df, results = df_sum)
 }
