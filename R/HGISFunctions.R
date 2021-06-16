@@ -214,11 +214,11 @@ compare_replicates <- function(data) {
   }
   
   data %>% 
-    mutate(Name = str_remove(sample_name, "_.*$"),
-           he12C = he12C * 1E6) %>% 
-    group_by(Name, rec_num) %>% 
+    mutate(he12C = he12C * 1E6) %>% 
+    group_by(rec_num) %>% 
     filter(n() > 1) %>% 
-    summarize(across(cols,
+    summarize(Name = str_remove(sample_name[1], "_.*$"),
+              across(cols,
                      list(mean = mean, sd = sd)),
               N = n()) 
 }
