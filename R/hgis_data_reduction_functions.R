@@ -67,6 +67,27 @@ doLBCerror <- function(fmmeas, fmblank, fmstd, fmmeaserr, fmblankerr) {
 	fmblankerr ^ 2 * ((fmmeas - fmstd) / fmstd) ^ 2)
 }
 
+
+#' Flag outliers using a list of measurements
+#'
+#' @param data A data frame of run data, processed by `process_hgis_results`.
+#' @param outliers A data frame of pos and meas of outliers 
+#'
+#' @return The data frame with outliers flagged as FALSE in ok_calc.
+#' @export
+#'
+flag_outliers <- function(data, outliers) {
+  
+  outliers <- mutate(outliers, ok_calc = FALSE)
+  
+  data %>% 
+    select(-ok_calc) %>% 
+    left_join(outliers, by = c("pos", "meas")) %>% 
+    mutate(ok_calc = is.na(ok_calc))
+  
+}
+
+
 # 
 #' Summarize HGIS data per target
 #'
