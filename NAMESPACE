@@ -2,8 +2,10 @@
 
 export(blank_cor_hgis)
 export(calc_d13c)
+export(compare_consensus)
 export(compare_replicates)
 export(concCO2)
+export(flag_outliers)
 export(flowcalc)
 export(get_hgis_data)
 export(hgis_eff)

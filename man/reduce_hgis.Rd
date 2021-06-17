@@ -4,7 +4,14 @@
 \alias{reduce_hgis}
 \title{Reduce HGIS data from an AMS results file}
 \usage{
-reduce_hgis(file, date, standards, blanks)
+reduce_hgis(
+  file,
+  date = NULL,
+  standards = NULL,
+  blanks = NULL,
+  remove_outliers = TRUE,
+  get_consensus = TRUE
+)
 }
 \arguments{
 \item{file}{A SNICS results file}

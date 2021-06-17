@@ -4,7 +4,7 @@
 \alias{get_hgis_data}
 \title{Get and process hgis data from results file.}
 \usage{
-get_hgis_data(file, date, standards)
+get_hgis_data(file, date = NULL, standards = NULL)
 }
 \arguments{
 \item{file}{Path to a NOSAMS format AMS results file.}

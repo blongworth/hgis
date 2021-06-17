@@ -222,3 +222,24 @@ compare_replicates <- function(data) {
                      list(mean = mean, sd = sd)),
               N = n()) 
 }
+
+#' Compare data to consensus Fm
+#'
+#' @param data A results dataframe with fm_consensus, fm_corr, and sig_fm_corr
+#'
+#' @return A data frame showing agreement with consensus for all samples.
+#' @export
+#'
+compare_consensus <- function(data) {
+  data %>% 
+    filter(!is.na(fm_consensus)) %>% 
+    mutate(Name = case_when(rec_num == 101730 ~ "LiveGas",
+                                rec_num == 83028 ~ "C-1",
+                                rec_num == 2138 ~ "TIRI-F",
+                                rec_num == 17185 ~ "TIRI-I",
+                                rec_num == 1082 ~ "C-2",
+                                rec_num == 38809 ~ "NOSAMS2",
+                                rec_num == 72446 ~ "DeadGas"),
+           Fm_diff = fm_corr - fm_consensus,
+           sigma = amstools::sigma(fm_corr, fm_consensus, sig_fm_corr))
+}

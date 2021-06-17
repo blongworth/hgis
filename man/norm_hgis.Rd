@@ -4,7 +4,7 @@
 \alias{norm_hgis}
 \title{Normalize HGIS data}
 \usage{
-norm_hgis(data, standards)
+norm_hgis(data, standards = NULL)
 }
 \arguments{
 \item{data}{A data frame of per-sample data.}

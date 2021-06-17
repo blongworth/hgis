@@ -4,7 +4,7 @@
 \alias{blank_cor_hgis}
 \title{Blank correct HGIS data}
 \usage{
-blank_cor_hgis(data, blanks, fmstd = 1.0398)
+blank_cor_hgis(data, blanks = NULL, fmstd = 1.0398)
 }
 \arguments{
 \item{data}{A data frame of normalized per-sample data.}
