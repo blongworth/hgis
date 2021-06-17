@@ -17,6 +17,7 @@
 #'
 plot_hgis_time <- function(data, y_var = normFm, errors = NULL, outlier) {
   y_var <- enquo(y_var)
+  outlier <- enquo(outlier)
   
   if (!("cum_acqtime" %in% names(data))) {
     data <- data %>% 
@@ -26,14 +27,14 @@ plot_hgis_time <- function(data, y_var = normFm, errors = NULL, outlier) {
   
   if (missing(errors)) {
     ggplot(data, aes(cum_acqtime, !!y_var)) +
-      geom_point(aes(color = outlier)) + 
+      geom_point(aes(color = !!outlier)) + 
       facet_wrap(vars(pos_name), scales = "free")
   } else {
     errors <- enquo(errors)
     
     ggplot(data, aes(cum_acqtime, !!y_var)) +
       geom_pointrange(aes(ymin = !!y_var - !!errors, ymax = !!y_var + !!errors,
-                         color = outlier), size = .2) + 
+                         color = !!outlier), size = .2) + 
       facet_wrap(vars(pos_name), scales = "free") +
       labs(title = paste(as_label(y_var), "by target"),
            x = "Time (s)",
@@ -90,4 +91,24 @@ plot_hgis_summary <- function(data) {
       labs(x = NULL,
            y = "Fraction Modern")
     
+}
+
+#' Plot difference from consensus
+#'
+#' @param data A data frame as output from `compare_consensus()`
+#'
+#' @return A ggplot2 object
+#' @export
+#'
+plot_hgis_consensus <- function(data) {
+  ggplot(data, aes(fm_consensus, Fm_diff, color = he12C)) +
+    geom_hline(yintercept = 0) +
+    geom_smooth(method = "lm", se = FALSE) +
+    geom_pointrange(aes(ymin = Fm_diff - sig_fm_corr, ymax = Fm_diff + sig_fm_corr), 
+                    position = position_dodge2(width = 0.1),
+                    size = .2) +
+    labs(subtitle = "Blank corrected",
+         x = "Fm expected",
+         y = "Fm difference") +
+    theme_classic()
 }
