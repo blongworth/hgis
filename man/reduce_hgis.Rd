@@ -9,6 +9,7 @@ reduce_hgis(
   date = NULL,
   standards = NULL,
   blanks = NULL,
+  outliers = NULL,
   remove_outliers = TRUE,
   get_consensus = TRUE
 )

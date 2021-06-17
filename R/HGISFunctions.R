@@ -102,18 +102,16 @@ process_hgis_results <- function(file, date = NULL, standards = NULL) {
   
   data <- data %>%
     mutate(pos_name = reorder(paste(pos, sample_name, sep = " - "), pos),
-           wheel = str_extract(file, "USAMS\\d{6}")) %>% 
-    group_by(pos, sample_name) %>% 
-    mutate(ok_calc = !ifelse(is.na(removeOutliers(corr_14_12)), TRUE, FALSE)) %>% 
-    ungroup()
+           wheel = str_extract(file, "USAMS\\d{6}"),
+           ok_calc = TRUE)
     
   meanstd <- data %>% 
-    filter(sample_type == "S" & ok_calc) %>% 
+    filter(sample_type == "S") %>% 
     pull(corr_14_12) %>% 
     mean()
   
   mean13cstd <- data %>%
-    filter(sample_type == "S" & ok_calc) %>% 
+    filter(sample_type == "S") %>% 
     pull(he13_12) %>% 
     mean()
 

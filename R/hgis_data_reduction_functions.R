@@ -249,8 +249,14 @@ blank_cor_hgis <- function(data, blanks = NULL, fmstd = 1.0398) {
 #' @return A dataframe of results.
 #' @export
 #'
-reduce_hgis <- function(file, date = NULL, standards = NULL, blanks = NULL, remove_outliers = TRUE, get_consensus = TRUE) {
+reduce_hgis <- function(file, date = NULL, standards = NULL, 
+                        blanks = NULL, outliers = NULL,
+                        remove_outliers = TRUE, get_consensus = TRUE) {
   df <- process_hgis_results(file, date, standards)
+  
+  if (!is.null(outliers)) {
+    df <- flag_outliers(df, outliers)
+  }
   
   df_sum <- df %>% 
     sum_hgis_targets(remove_outliers, get_consensus) %>% 
