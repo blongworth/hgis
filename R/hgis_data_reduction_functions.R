@@ -1,16 +1,5 @@
 # Functions for HGIS data reduction
 
-# Add 13C and deadtime correction
-doCor1412 <- function(he1412, ltcorr, he1312) {
-	he1412 / ltcorr / he1312 ^ 2
-}
-
-# Calc internal error for a measurement
-calcSig1412 <- function(CntTotH, CntTotS, CntTotGT, cor1412) {
-RelErrSq <- (CntTotH - CntTotS) * CntTotH ^ 2 / CntTotS ^ 4 + 
-             CntTotH ^ 2 / CntTotGT / CntTotS ^ 2
-cor1412 * RelErrSq ^ 0.5
-}
 
 #' Calculate d13C
 #'
@@ -23,51 +12,6 @@ calc_d13c <- function(he1312) {
 	1000 * (he1312 / 1.12372 -1)
 }
 
-## Normalize
-# Find standards
-
-
-# Find mean of stds
-normStds <- function(cor1412std, defstd) {
-  # both vectors, same length or 1 element vector if all standards are same
-  mean(cor1412std/defstd) 
-}
-
-# Normalize to mean of standards
-norm1412 <- function(cor1412, meanstd) {
-  cor1412/meanstd
-}
-
-#' Normalize a gas target run using the measured and consensus value of a standard
-#'
-#' @param sample Ratio to be normalized.
-#' @param standard Measured ratio of the standard.
-#' @param stdrat Consensus value of the standard.
-#'
-#' @return The normalized ratio of the sample.
-#' @export
-#'
-norm_gas <- function(sample, standard, stdrat = 1.0398) {
-  sample/standard * stdrat
-}
-
-
-
-
-## Blank correction
-
-# Apply large blank
-doLBC <- function(fmmeas, fmblank, fmstd) {
-	fmmeas - fmblank * (fmstd - fmmeas) / fmstd
-}
-
-# Propagate large blank error
-doLBCerror <- function(fmmeas, fmblank, fmstd, fmmeaserr, fmblankerr) {
-	sqrt(fmmeaserr ^ 2 * (1 + fmblank / fmstd) ^ 2 +
-	fmblankerr ^ 2 * ((fmmeas - fmstd) / fmstd) ^ 2)
-}
-
-
 #' Flag outliers using a list of measurements
 #'
 #' @param data A data frame of run data, processed by `process_hgis_results`.
@@ -77,18 +21,13 @@ doLBCerror <- function(fmmeas, fmblank, fmstd, fmmeaserr, fmblankerr) {
 #' @export
 #'
 flag_outliers <- function(data, outliers) {
-  
   outliers <- mutate(outliers, ok_calc = FALSE)
-  
   data %>% 
     select(-ok_calc) %>% 
     left_join(outliers, by = c("pos", "meas")) %>% 
     mutate(ok_calc = is.na(ok_calc))
-  
 }
 
-
-# 
 #' Summarize HGIS data per target
 #'
 #' @param data A data frame of run data, processed by `process_hgis_results`.
@@ -99,11 +38,9 @@ flag_outliers <- function(data, outliers) {
 #' @export
 #'
 sum_hgis_targets <- function(data, remove_outliers = TRUE, get_consensus = TRUE) {
-  
   if (remove_outliers == TRUE) {
     data <- filter(data, ok_calc)
   }
-
   data_sum <- data %>% 
     group_by(pos, sample_name, sample_type, wheel) %>% 
     summarize(runtime = min(runtime),
@@ -124,7 +61,6 @@ sum_hgis_targets <- function(data, remove_outliers = TRUE, get_consensus = TRUE)
                                str_starts(sample_name, "C-?2") ~ 1082,
                                str_starts(sample_name, "NOSAMS-?2") ~ 38809,
                                str_starts(sample_name, "DeadGas") ~ 72446))
-    
   if (get_consensus == TRUE) {
     std <- amstools::getStdTable()
     data_sum %>%  
@@ -135,9 +71,23 @@ sum_hgis_targets <- function(data, remove_outliers = TRUE, get_consensus = TRUE)
   } else {
     data_sum
   }
-  
 }
 
+
+## Normalize
+
+#' Normalize a gas target run using the measured and consensus value of a standard
+#'
+#' @param sample Ratio to be normalized.
+#' @param standard Measured ratio of the standard.
+#' @param stdrat Consensus value of the standard.
+#'
+#' @return The normalized ratio of the sample.
+#' @export
+#'
+norm_gas <- function(sample, standard, stdrat = 1.0398) {
+  sample/standard * stdrat
+}
 
 #' Calculate normalization error
 #'
@@ -156,7 +106,6 @@ norm_err <- function(sample, standard, sample_err, standard_err,
        stdrat_err^2/stdrat^2)
 }
 
-
 #' Normalize HGIS data
 #'
 #' @param data A data frame of per-sample data.
@@ -166,31 +115,34 @@ norm_err <- function(sample, standard, sample_err, standard_err,
 #' @export
 #'
 norm_hgis <- function(data, standards = NULL) {
-  
   if (!is.null(standards)) {
     data <- data %>% 
       mutate(Num = case_when(pos %in% standards ~ "S",
                              sample_type == "S" ~ "U",
                              TRUE ~ sample_type))
   }
-  
   meanstd <- data %>% 
     filter(sample_type == "S") %>% 
     pull(corr_14_12) %>% 
     mean()
-  
   # Using se of standards as standard error. Should probably compare to per-standard error
   stderr <- data %>% 
     filter(sample_type == "S") %>% 
     pull(corr_14_12) %>% 
     se()
-  
   data %>% 
     mutate(norm_ratio = norm_gas(corr_14_12, meanstd),
            sig_norm_ratio = norm_err(corr_14_12, meanstd, max_err, stderr) * norm_ratio 
           )
-  
 }
+
+
+## Blank correction
+
+
+
+
+
 
 
 #' Blank correct HGIS data
@@ -203,32 +155,27 @@ norm_hgis <- function(data, standards = NULL) {
 #' @export
 #'
 blank_cor_hgis <- function(data, blanks = NULL, fmstd = 1.0398) {
-  
   if (!is.null(blanks)) {
     data <- data %>% 
       mutate(sample_type = case_when(pos %in% blanks ~ "B",
                              sample_type == "B" ~ "U",
                              TRUE ~ sample_type ))
   }
-  
   meanblank <- data %>% 
     filter(sample_type == "B") %>% 
     pull(norm_ratio) %>% 
     mean()
-  
   blankerr <- data %>% 
     filter(sample_type == "B") %>% 
     pull(norm_ratio) %>% 
     amstools::blankErr() # uses SNICSer error floor method
-  
   data %>% 
     mutate(fm_corr = amstools::doLBC(norm_ratio, meanblank, fmstd),
            sig_fm_corr = amstools::doLBCerr(norm_ratio, meanblank, fmstd, sig_norm_ratio, blankerr)
           )
 }
 
-# Produce normalized data for wheel per target
-
+# Master data reduction function
 
 #' Reduce HGIS data from an AMS results file
 #' 
@@ -253,15 +200,12 @@ reduce_hgis <- function(file, date = NULL, standards = NULL,
                         blanks = NULL, outliers = NULL,
                         remove_outliers = TRUE, get_consensus = TRUE) {
   df <- process_hgis_results(file, date, standards)
-  
   if (!is.null(outliers)) {
     df <- flag_outliers(df, outliers)
   }
-  
   df_sum <- df %>% 
     sum_hgis_targets(remove_outliers, get_consensus) %>% 
     norm_hgis(standards) %>% 
     blank_cor_hgis(blanks)
-  
   list(raw = df, results = df_sum)
 }
