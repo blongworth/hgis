@@ -139,12 +139,6 @@ norm_hgis <- function(data, standards = NULL) {
 
 ## Blank correction
 
-
-
-
-
-
-
 #' Blank correct HGIS data
 #'
 #' @param data A data frame of normalized per-sample data.
@@ -161,14 +155,15 @@ blank_cor_hgis <- function(data, blanks = NULL, fmstd = 1.0398) {
                              sample_type == "B" ~ "U",
                              TRUE ~ sample_type ))
   }
-  meanblank <- data %>% 
-    filter(sample_type == "B") %>% 
-    pull(norm_ratio) %>% 
-    mean()
-  blankerr <- data %>% 
-    filter(sample_type == "B") %>% 
-    pull(norm_ratio) %>% 
-    amstools::blankErr() # uses SNICSer error floor method
+  
+  blanks <- data %>% 
+    filter(sample_type == "B")
+  
+  meanblank <- mean(blanks$norm_ratio)
+  
+  # get blank error using SNICSer error floor
+  blankerr <- amstools::blankErr(blanks$norm_ratio, blanks$sig_norm_ratio) # uses SNICSer error floor method
+  # apply blank correction and propagate error
   data %>% 
     mutate(fm_corr = amstools::doLBC(norm_ratio, meanblank, fmstd),
            sig_fm_corr = amstools::doLBCerr(norm_ratio, meanblank, fmstd, sig_norm_ratio, blankerr)
