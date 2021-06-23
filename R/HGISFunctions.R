@@ -101,8 +101,7 @@ process_hgis_results <- function(file, date = NULL, standards = NULL) {
   }
   
   data <- data %>%
-    mutate(pos_name = reorder(paste(pos, sample_name, sep = " - "), pos),
-           wheel = str_extract(file, "USAMS\\d{6}"),
+    mutate(wheel = str_extract(file, "USAMS\\d{6}"),
            ok_calc = TRUE)
     
   meanstd <- data %>% 
@@ -238,6 +237,6 @@ compare_consensus <- function(data) {
                                 rec_num == 1082 ~ "C-2",
                                 rec_num == 38809 ~ "NOSAMS2",
                                 rec_num == 72446 ~ "DeadGas"),
-           Fm_diff = fm_corr - fm_consensus,
+           fm_diff = fm_corr - fm_consensus,
            sigma = amstools::sigma(fm_corr, fm_consensus, sig_fm_corr))
 }

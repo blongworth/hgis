@@ -19,6 +19,12 @@ plot_hgis_time <- function(data, y_var = normFm, errors = NULL, outlier) {
   y_var <- enquo(y_var)
   outlier <- enquo(outlier)
   
+  if (!("pos_name" %in% names(data))) {
+    data <- data %>% 
+      group_by(sample_name, pos) %>% 
+      mutate(pos_name = paste(pos, sample_name, sep = " - "))
+  }
+  
   if (!("cum_acqtime" %in% names(data))) {
     data <- data %>% 
       group_by(sample_name, pos) %>% 
@@ -101,10 +107,10 @@ plot_hgis_summary <- function(data) {
 #' @export
 #'
 plot_hgis_consensus <- function(data) {
-  ggplot(data, aes(fm_consensus, Fm_diff, color = he12C)) +
+  ggplot(data, aes(fm_consensus, fm_diff, color = he12C)) +
     geom_hline(yintercept = 0) +
     geom_smooth(method = "lm", se = FALSE) +
-    geom_pointrange(aes(ymin = Fm_diff - sig_fm_corr, ymax = Fm_diff + sig_fm_corr), 
+    geom_pointrange(aes(ymin = fm_diff - sig_fm_corr, ymax = fm_diff + sig_fm_corr), 
                     position = position_dodge2(width = 0.1),
                     size = .2) +
     labs(subtitle = "Blank corrected",

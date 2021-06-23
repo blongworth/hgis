@@ -117,7 +117,7 @@ norm_err <- function(sample, standard, sample_err, standard_err,
 norm_hgis <- function(data, standards = NULL) {
   if (!is.null(standards)) {
     data <- data %>% 
-      mutate(Num = case_when(pos %in% standards ~ "S",
+      mutate(sample_type = case_when(pos %in% standards ~ "S",
                              sample_type == "S" ~ "U",
                              TRUE ~ sample_type))
   }
