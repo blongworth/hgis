@@ -13,12 +13,12 @@ knitr::opts_chunk$set(
 )
 ```
 
-# HybridGIS
+# HGIS
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The HybridGIS project contains functions, analysis scripts and data for the NOSAMS hybrid gas ion source.
+The hgis package contains functions for data reduction and analysis of data for the NOSAMS hybrid gas ion source.
 
 ## Installation
 
@@ -29,26 +29,11 @@ You can install the development version from [GitHub](https://github.com/) with:
 devtools::install_github("blongworth/hgis")
 ```
 
-Running `make` will download the NOSAMS results files if a connection to the NOSAMS file server is available. This currently uses an absolute path to the server of `/mnt/shared/USAMS/Results`. This should be converted to a URL, but until then, modify `RES_DIR` in `Makefile` to match it's location on your system. `make` will eventually run the analysis scripts as well. 
-
-## Functions
+## Use
 
 Loading the package loads functions for flow calculation, efficiency, data import, data reduction and plotting.
 
 ```{r example}
-library(HybridGIS)
+library(hgis)
 ```
 
-# Project Summary
-
-The information below summarizes the operating parameters, development, and questions
-for the hybrid gas ion source on USAMS.
-
-```{r child='summary.Rmd'}
-```
-
-# Presentations
-
-Slides for a presentation given at SNEAP 2021:
-
-### [SNEAP 2021 Presentation](doc/SNEAP2021/SNEAP2021_HGIS_presentation/SNEAP2021_HGIS_presentation.html)
