@@ -13,3 +13,12 @@ Encoding: UTF-8
 LazyData: false
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+Imports:
+    amstools,
+    DBI,
+    dplyr,
+    ggplot2,
+    here,
+    magrittr,
+    purrr,
+    RSQLite
