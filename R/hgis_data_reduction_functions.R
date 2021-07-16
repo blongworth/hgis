@@ -3,7 +3,7 @@
 
 #' Calculate d13C
 #'
-#' @param he1312 
+#' @param normhe1312 13/12 ratio normalized
 #'
 #' @return
 #' @export
@@ -50,7 +50,7 @@ sum_hgis_targets <- function(data, remove_outliers = TRUE, get_consensus = TRUE)
               int_err = 1/sqrt(counts) * mean(corr_14_12),
               max_err = pmax(ext_err, int_err),
               across(c(le12C, le13C, he12C, he13C,
-                       he13_12, he14_12, corr_14_12), 
+                       he13_12, he14_12, corr_14_12, norm_del13c), 
                      list(mean = mean, sd = sd),
                      .names = "{ifelse(.fn == 'mean', '', 'sig_')}{.col}"),
               ) %>% 
@@ -132,7 +132,8 @@ norm_hgis <- function(data, standards = NULL) {
     se()
   data %>% 
     mutate(norm_ratio = norm_gas(corr_14_12, meanstd),
-           sig_norm_ratio = norm_err(corr_14_12, meanstd, max_err, stderr) * norm_ratio 
+           sig_norm_ratio = norm_err(corr_14_12, meanstd, max_err, stderr) * norm_ratio,
+           d13C = mean(norm_del13c)
           )
 }
 
