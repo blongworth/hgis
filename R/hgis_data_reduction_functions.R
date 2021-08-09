@@ -3,7 +3,7 @@
 
 #' Calculate d13C
 #'
-#' @param he1312 
+#' @param normhe1312 13/12 ratio normalized
 #'
 #' @return
 #' @export
@@ -29,6 +29,8 @@ flag_outliers <- function(data, outliers) {
 }
 
 #' Summarize HGIS data per target
+#' 
+#' Combine runs of targets and compute per-target statistics. 
 #'
 #' @param data A data frame of run data, processed by `process_hgis_results`.
 #' @param remove_outliers If `TRUE`, do not include samples where `ok_calc == FALSE`.
@@ -47,10 +49,12 @@ sum_hgis_targets <- function(data, remove_outliers = TRUE, get_consensus = TRUE)
               counts = sum(CntTotGT),
               n_runs = n(),
               ext_err = amstools::se(corr_14_12),
-              int_err = 1/sqrt(counts) * mean(corr_14_12),
+              #int_err = 1/sqrt(counts) * mean(corr_14_12),
+              # now using error propagated mean
+              int_err = sqrt(sum((corr_14_12/sqrt(CntTotGT))^2))/n(),
               max_err = pmax(ext_err, int_err),
               across(c(le12C, le13C, he12C, he13C,
-                       he13_12, he14_12, corr_14_12), 
+                       he13_12, he14_12, corr_14_12, norm_del13c), 
                      list(mean = mean, sd = sd),
                      .names = "{ifelse(.fn == 'mean', '', 'sig_')}{.col}"),
               ) %>% 
@@ -121,18 +125,23 @@ norm_hgis <- function(data, standards = NULL) {
                              sample_type == "S" ~ "U",
                              TRUE ~ sample_type))
   }
-  meanstd <- data %>% 
-    filter(sample_type == "S") %>% 
+  stds <- data %>% 
+    filter(sample_type == "S") 
+  meanstd <- stds %>% 
     pull(corr_14_12) %>% 
     mean()
   # Using se of standards as standard error. Should probably compare to per-standard error
-  stderr <- data %>% 
-    filter(sample_type == "S") %>% 
+  stderr_se <- stds %>% 
     pull(corr_14_12) %>% 
-    se()
+    amstools::se()
+  stderr_prop_error <- stds %>% 
+    pull(max_err) %>% 
+    (function(x) sqrt(sum(x^2))/length(x))
+  stderr <- max(stderr_se, stderr_prop_error)
   data %>% 
     mutate(norm_ratio = norm_gas(corr_14_12, meanstd),
-           sig_norm_ratio = norm_err(corr_14_12, meanstd, max_err, stderr) * norm_ratio 
+           sig_norm_ratio = norm_err(corr_14_12, meanstd, max_err, stderr) * norm_ratio,
+           d13C = mean(norm_del13c)
           )
 }
 
