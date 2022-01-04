@@ -25,8 +25,8 @@ The hgis package contains functions for data reduction and analysis of data for 
 You can install the development version from [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("blongworth/hgis")
+# install.packages("remotes")
+remotes::install_github("blongworth/hgis")
 ```
 
 ## Use
@@ -36,4 +36,5 @@ Loading the package loads functions for flow calculation, efficiency, data impor
 ```{r example}
 library(hgis)
 ```
+
 
