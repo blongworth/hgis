@@ -3,9 +3,9 @@
 
 #' Calculate d13C
 #'
-#' @param he1312 
+#' @param he1312 Normalized 13/12 ratio
 #'
-#' @return
+#' @return Delta 13C of the sample.
 #' @export
 #'
 calc_d13c <- function(he1312) {
@@ -121,18 +121,13 @@ norm_hgis <- function(data, standards = NULL) {
                              sample_type == "S" ~ "U",
                              TRUE ~ sample_type))
   }
-  meanstd <- data %>% 
+  stds <- data %>% 
     filter(sample_type == "S") %>% 
-    pull(corr_14_12) %>% 
-    mean()
+    summarize(across(corr_14_12, list(mean = mean, se = se)))
   # Using se of standards as standard error. Should probably compare to per-standard error
-  stderr <- data %>% 
-    filter(sample_type == "S") %>% 
-    pull(corr_14_12) %>% 
-    se()
   data %>% 
-    mutate(norm_ratio = norm_gas(corr_14_12, meanstd),
-           sig_norm_ratio = norm_err(corr_14_12, meanstd, max_err, stderr) * norm_ratio 
+    mutate(norm_ratio = norm_gas(corr_14_12, stds$corr_14_12_mean),
+           sig_norm_ratio = norm_err(corr_14_12, stds$corr_14_12_mean, max_err, stds$corr_14_12_se) * norm_ratio 
           )
 }
 
@@ -177,14 +172,12 @@ blank_cor_hgis <- function(data, blanks = NULL, fmstd = 1.0398) {
 #'  Steps:
 #'  1. Load data
 #'  2. Process raw data.
-#'  3. Insert raw data into DB
-#'  4. Reduce data
-#'  5. Normalize
-#'  6. Blank Correct
-#'  7. Insert results into DB
+#'  3. Reduce data
+#'  4. Normalize
+#'  5. Blank Correct
 #'
 #' @param file A SNICS results file
-#' @param date Date sample run if analysing a specific day
+#' @param date Date sample run if analyzing a specific day
 #' @param standards A vector of standard positions.
 #' @param blanks A vector of blank positions.
 #'
