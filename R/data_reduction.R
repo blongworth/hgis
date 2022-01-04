@@ -29,6 +29,8 @@ flag_outliers <- function(data, outliers) {
 }
 
 #' Summarize HGIS data per target
+#' 
+#' Combine runs of targets and compute per-target statistics. 
 #'
 #' @param data A data frame of run data, processed by `process_hgis_results`.
 #' @param remove_outliers If `TRUE`, do not include samples where `ok_calc == FALSE`.
@@ -47,10 +49,12 @@ sum_hgis_targets <- function(data, remove_outliers = TRUE, get_consensus = TRUE)
               counts = sum(CntTotGT),
               n_runs = n(),
               ext_err = amstools::se(corr_14_12),
-              int_err = 1/sqrt(counts) * mean(corr_14_12),
+              #int_err = 1/sqrt(counts) * mean(corr_14_12),
+              # now using error propagated mean
+              int_err = sqrt(sum((corr_14_12/sqrt(CntTotGT))^2))/n(),
               max_err = pmax(ext_err, int_err),
               across(c(le12C, le13C, he12C, he13C,
-                       he13_12, he14_12, corr_14_12), 
+                       he13_12, he14_12, corr_14_12, norm_del13c), 
                      list(mean = mean, sd = sd),
                      .names = "{ifelse(.fn == 'mean', '', 'sig_')}{.col}"),
               ) %>% 
@@ -121,13 +125,24 @@ norm_hgis <- function(data, standards = NULL) {
                              sample_type == "S" ~ "U",
                              TRUE ~ sample_type))
   }
+  
+  prop_err <- function(err) {
+    sqrt(sum(err^2))/length(err)
+    
+  }
+  
   stds <- data %>% 
     filter(sample_type == "S") %>% 
-    summarize(across(corr_14_12, list(mean = mean, se = se)))
-  # Using se of standards as standard error. Should probably compare to per-standard error
+    summarize(across(corr_14_12, list(mean = mean, se = se)),
+              prop_err = prop_err(max_err),
+              norm_std_err = max(cor_14_12_se, propagated_err))
+  # Using greater of se of standards or propagated measurement error of stds as error in norm stds.
+  
+  
   data %>% 
     mutate(norm_ratio = norm_gas(corr_14_12, stds$corr_14_12_mean),
-           sig_norm_ratio = norm_err(corr_14_12, stds$corr_14_12_mean, max_err, stds$corr_14_12_se) * norm_ratio 
+           sig_norm_ratio = norm_err(corr_14_12, stds$corr_14_12_mean, max_err, stds$norm_std_err) * norm_ratio, 
+           d13C = mean(norm_del13c)
           )
 }
 
