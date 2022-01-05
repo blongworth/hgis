@@ -7,7 +7,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "blongworth@whoi.edu",
            comment = c(ORCID = "0000-0001-8318-2054"))
-Description: The hgis contains functions for data reduction and analysis for the NOSAMS hybrid gas ion source.
+Description: Contains functions for data reduction and analysis for the NOSAMS hybrid gas ion source.
 License: AGPL-3
 Encoding: UTF-8
 LazyData: false
@@ -22,4 +22,5 @@ Imports:
 Suggests:
     DBI,
     here,
-    RSQLite
+    RSQLite,
+    testthat

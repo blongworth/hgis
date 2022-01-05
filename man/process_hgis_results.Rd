@@ -19,4 +19,6 @@ process_hgis_results(file, date = NULL, standards = NULL)
 \description{
 Read data file and perform standard munging.
 Normalize using mean of samples marked as "S", or a list of standards.
+This is a rough per-run normalization, not the final Fm of a sample.
+Use \code{sum_hgis_targets()} and \code{norm_hgis()} to produce a per-sample result.
 }

@@ -1,5 +1,9 @@
 # Functions for HGIS file IO
 
+#' @importFrom magrittr `%>%`
+NULL
+
+
 #' Read SNICS results file
 #'
 #' @param file A path to a SNICS results file
@@ -8,26 +12,27 @@
 #' @export
 #'
 read_results_file <- function(file) {
-  res_cols <- cols(
-    runtime = col_datetime(format = "%a %b %d %H:%M:%S %Y"),
-    pos = col_integer(),
-    meas = col_integer(),
-    sample_name = col_character(),
-    sample_type = col_character(),
-    cycles = col_double(),
-    le12C = col_double(),
-    le13C = col_double(),
-    he12C = col_double(),
-    he13C = col_double(),
-    CntTotH = col_integer(),
-    CntTotS = col_integer(),
-    CntTotGT = col_integer(),
-    he13_12 = col_double(),
-    he14_12 = col_double()
+  res_cols <- readr::cols(
+    runtime = readr::col_datetime(format = "%a %b %d %H:%M:%S %Y"),
+    pos = "i",
+    meas = "i",
+    sample_name = "c",
+    sample_type = "c",
+    cycles = "d",
+    le12C = "d",
+    le13C = "d",
+    he12C = "d",
+    he13C = "d",
+    CntTotH = "i",
+    CntTotS = "i",
+    CntTotGT = "i",
+    he13_12 = "d",
+    he14_12 = "d"
   )
   
-  read_tsv(file, col_names = names(res_cols$cols), col_types = res_cols, skip = 5, comment = "=") %>%
-    mutate(corr_14_12 = he14_12/he13_12^2,
+  readr::read_tsv(file, col_names = names(res_cols$cols),
+                  col_types = res_cols, skip = 5, comment = "=") %>% 
+    dplyr::mutate(corr_14_12 = he14_12/he13_12^2,
 	   sig_14_12 = 1/sqrt(CntTotGT),
 	   corr_lt = cycles/10)
 }
@@ -37,6 +42,8 @@ read_results_file <- function(file) {
 #'
 #' Read data file and perform standard munging. 
 #' Normalize using mean of samples marked as "S", or a list of standards.
+#' This is a rough per-run normalization, not the final Fm of a sample.
+#' Use `sum_hgis_targets()` and `norm_hgis()` to produce a per-sample result.
 #' 
 #' @param file Path to a NOSAMS format AMS results file.
 #' @param date A vector of dates to subset from file. All data used if missing.
@@ -49,38 +56,43 @@ process_hgis_results <- function(file, date = NULL, standards = NULL) {
   data <- read_results_file(file)
 
   if (!is.null(date)) {
-    data <- filter(data, as.Date(runtime) %in% date)
+    data <- dplyr::filter(data, as.Date(runtime) %in% date)
   }
   
   if (!is.null(standards)) {
     data <- data %>% 
-      mutate(sample_type = case_when(pos %in% standards ~ "S",
+      dplyr::mutate(sample_type = dplyr::case_when(pos %in% standards ~ "S",
                              sample_type == "S" ~ "U",
                              TRUE ~ sample_type))
   }
   
   data <- data %>%
-    mutate(wheel = str_extract(file, "USAMS\\d{6}"),
+    dplyr::mutate(wheel = stringr::str_extract(file, "USAMS\\d{6}"),
            ok_calc = TRUE)
     
   meanstd <- data %>% 
-    filter(sample_type == "S") %>% 
-    pull(corr_14_12) %>% 
+    dplyr::filter(sample_type == "S") %>% 
+    dplyr::pull(corr_14_12) %>% 
     mean()
   
   mean13cstd <- data %>%
-    filter(sample_type == "S") %>% 
-    pull(he13_12) %>% 
+    dplyr::filter(sample_type == "S") %>% 
+    dplyr::pull(he13_12) %>% 
     mean()
 
   data %>%
-    mutate(norm_ratio = norm_gas(corr_14_12, meanstd),
+    dplyr::mutate(norm_ratio = norm_gas(corr_14_12, meanstd),
            sig_norm_ratio = sig_14_12 * norm_ratio,
            norm_he13_12 = norm_gas(he13_12, mean13cstd, 1.111618),
            norm_del13c = calc_d13c(norm_he13_12))
 }
   
-	   
+
+###########
+# Older functions below here
+###########
+
+
 #' Get and process hgis data from results file.
 #'
 #' Read data file and perform standard munging with amstools::mungeResfile(). 

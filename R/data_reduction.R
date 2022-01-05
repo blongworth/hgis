@@ -1,5 +1,9 @@
 # Functions for HGIS data reduction
 
+#' @importFrom magrittr `%>%`
+#' @importFrom dplyr filter mutate select summarize group_by ungroup n case_when across left_join
+#' @importFrom stringr str_starts
+NULL
 
 #' Calculate d13C
 #'
@@ -64,7 +68,8 @@ sum_hgis_targets <- function(data, remove_outliers = TRUE, get_consensus = TRUE)
                                str_starts(sample_name, "TIRI-I") ~ 17185,
                                str_starts(sample_name, "C-?2") ~ 1082,
                                str_starts(sample_name, "NOSAMS-?2") ~ 38809,
-                               str_starts(sample_name, "DeadGas") ~ 72446))
+                               str_starts(sample_name, "DeadGas") ~ 72446)) %>% 
+    ungroup()
   if (get_consensus == TRUE) {
     std <- amstools::getStdTable()
     data_sum %>%  
@@ -133,9 +138,9 @@ norm_hgis <- function(data, standards = NULL) {
   
   stds <- data %>% 
     filter(sample_type == "S") %>% 
-    summarize(across(corr_14_12, list(mean = mean, se = se)),
-              prop_err = prop_err(max_err),
-              norm_std_err = max(cor_14_12_se, propagated_err))
+    summarize(across(corr_14_12, list(mean = mean, se = amstools::se)),
+              propagated_err = prop_err(max_err),
+              norm_std_err = max(corr_14_12_se, propagated_err))
   # Using greater of se of standards or propagated measurement error of stds as error in norm stds.
   
   
