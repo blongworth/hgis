@@ -24,3 +24,5 @@ Suggests:
     here,
     RSQLite,
     testthat
+Remotes:
+    blongworth/amstools
