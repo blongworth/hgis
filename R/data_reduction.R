@@ -71,6 +71,7 @@ sum_hgis_targets <- function(data, remove_outliers = TRUE, get_consensus = TRUE)
                                str_starts(sample_name, "DeadGas") ~ 72446)) %>% 
     ungroup()
   if (get_consensus == TRUE) {
+    # TODO: fail gracefully if no DB available or use local file
     std <- amstools::getStdTable()
     data_sum %>%  
       left_join(select(std, rec_num, fm_consensus), by = "rec_num") %>% 
@@ -115,6 +116,34 @@ norm_err <- function(sample, standard, sample_err, standard_err,
        stdrat_err^2/stdrat^2)
 }
 
+#' Propagate errors
+#' 
+#' Add errors in quadrature for a vector of errors
+#'
+#' @param err A vector of errors
+#'
+#' @return A propagated error for the vector.
+#'
+prop_err <- function(err) {
+  sqrt(sum(err^2))/length(err)
+}
+  
+#' Summarize HGIS standards
+#'
+#' @param data An HGIS results dataframe, either raw or summarized by target
+#'
+#' @return A summary of standard means and errors
+#'
+summarize_standards <- function(data) {
+  data %>% 
+    filter(sample_type == "S") %>% 
+    mutate(max_err = ifelse("max_err" %in% names(.), max_err, sig_14_12)) %>% 
+    summarize(across(corr_14_12, list(mean = mean, se = amstools::se)),
+              propagated_err = prop_err(max_err),
+              norm_std_err = max(corr_14_12_se, propagated_err))
+  # Using greater of se of standards or propagated measurement error of stds as error in norm stds.
+}
+
 #' Normalize HGIS data
 #'
 #' @param data A data frame of per-sample data.
@@ -131,18 +160,7 @@ norm_hgis <- function(data, standards = NULL) {
                              TRUE ~ sample_type))
   }
   
-  prop_err <- function(err) {
-    sqrt(sum(err^2))/length(err)
-    
-  }
-  
-  stds <- data %>% 
-    filter(sample_type == "S") %>% 
-    summarize(across(corr_14_12, list(mean = mean, se = amstools::se)),
-              propagated_err = prop_err(max_err),
-              norm_std_err = max(corr_14_12_se, propagated_err))
-  # Using greater of se of standards or propagated measurement error of stds as error in norm stds.
-  
+  stds <- summarize_standards(data)
   
   data %>% 
     mutate(norm_ratio = norm_gas(corr_14_12, stds$corr_14_12_mean),

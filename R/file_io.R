@@ -70,10 +70,7 @@ process_hgis_results <- function(file, date = NULL, standards = NULL) {
     dplyr::mutate(wheel = stringr::str_extract(file, "USAMS\\d{6}"),
            ok_calc = TRUE)
     
-  meanstd <- data %>% 
-    dplyr::filter(sample_type == "S") %>% 
-    dplyr::pull(corr_14_12) %>% 
-    mean()
+  stds <- summarize_standards(data)
   
   mean13cstd <- data %>%
     dplyr::filter(sample_type == "S") %>% 
@@ -81,7 +78,7 @@ process_hgis_results <- function(file, date = NULL, standards = NULL) {
     mean()
 
   data %>%
-    dplyr::mutate(norm_ratio = norm_gas(corr_14_12, meanstd),
+    dplyr::mutate(norm_ratio = norm_gas(corr_14_12, stds$corr_14_12_mean),
            sig_norm_ratio = sig_14_12 * norm_ratio,
            norm_he13_12 = norm_gas(he13_12, mean13cstd, 1.111618),
            norm_del13c = calc_d13c(norm_he13_12))

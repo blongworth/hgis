@@ -1,4 +1,4 @@
 library(testthat)
-library(HybridGIS)
+library(hgis)
 
-test_check("HybridGIS")
+test_check("hgis")
