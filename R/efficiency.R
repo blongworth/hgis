@@ -34,5 +34,5 @@ hgis_eff <- function(ulm, uA, cs = 3) {
   atCin <- lCO2toatC(vol) / 60 # gives atoms/s
   atC12out <- CcurtoatC(cur, cs)
   atCout <- atC12out / .99 # 99% of C is 12C, we need total C
-  atC12out / atCin
+  atCout / atCin
 }

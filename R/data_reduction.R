@@ -105,6 +105,8 @@ norm_gas <- function(sample, standard, stdrat = 1.0398) {
 #' @param standard The normalized Fm of the standard
 #' @param sample_err The error of the sample
 #' @param standard_err The error of the standard
+#' @param stdrat The known ratio of the standard
+#' @param stdrat_err The error of the known ratio of standard
 #'
 #' @return The propagated error of the normalized sample
 #' @export
@@ -218,6 +220,9 @@ blank_cor_hgis <- function(data, blanks = NULL, fmstd = 1.0398) {
 #' @param date Date sample run if analyzing a specific day
 #' @param standards A vector of standard positions.
 #' @param blanks A vector of blank positions.
+#' @param outliers A dataframe of the position and measurement number of outlier runs.
+#' @param remove_outliers Remove outlier runs from analysis if TRUE
+#' @param get_consensus Get consensus values for samples if TRUE
 #'
 #' @return A dataframe of results.
 #' @export

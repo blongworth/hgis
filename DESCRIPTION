@@ -19,11 +19,13 @@ Imports:
     dplyr,
     ggplot2,
     magrittr,
-    purrr
+    purrr,
+    readr,
+    stringr
 Suggests:
     DBI,
     here,
     RSQLite,
     testthat
 Depends: 
-    R (>= 2.10)
+    R (>= 3.5.0)
