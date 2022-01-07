@@ -9,6 +9,7 @@
 #' @param data A tibble in format of output from get_hgis_data().
 #' @param y_var A column to plot against time
 #' @param errors A column containing errors for y_var
+#' @param outlier A column containing outliers to flag
 #'
 #' @return A ggplot object with norm ratio and current vs time,
 #' faceted for each pos_name.
@@ -84,7 +85,7 @@ plot_hgis <- function(data) {
 
 #' Plot normalized and corrected HGIS summary data
 #'
-#' @param data 
+#' @param data An object containing reduced HGIS data
 #'
 #' @return A ggplot2 object.
 #' @export

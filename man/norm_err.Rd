@@ -21,6 +21,10 @@ norm_err(
 \item{sample_err}{The error of the sample}
 
 \item{standard_err}{The error of the standard}
+
+\item{stdrat}{The known ratio of the standard}
+
+\item{stdrat_err}{The error of the known ratio of standard}
 }
 \value{
 The propagated error of the normalized sample

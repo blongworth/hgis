@@ -71,6 +71,7 @@ sum_hgis_targets <- function(data, remove_outliers = TRUE, get_consensus = TRUE)
                                str_starts(sample_name, "DeadGas") ~ 72446)) %>% 
     ungroup()
   if (get_consensus == TRUE) {
+    # TODO: fail gracefully if no DB available or use local file
     std <- amstools::getStdTable()
     data_sum %>%  
       left_join(select(std, rec_num, fm_consensus), by = "rec_num") %>% 
@@ -104,6 +105,8 @@ norm_gas <- function(sample, standard, stdrat = 1.0398) {
 #' @param standard The normalized Fm of the standard
 #' @param sample_err The error of the sample
 #' @param standard_err The error of the standard
+#' @param stdrat The known ratio of the standard
+#' @param stdrat_err The error of the known ratio of standard
 #'
 #' @return The propagated error of the normalized sample
 #' @export
@@ -113,6 +116,34 @@ norm_err <- function(sample, standard, sample_err, standard_err,
   sqrt(sample_err^2/sample^2 + 
        standard_err^2/standard^2 + 
        stdrat_err^2/stdrat^2)
+}
+
+#' Propagate errors
+#' 
+#' Add errors in quadrature for a vector of errors
+#'
+#' @param err A vector of errors
+#'
+#' @return A propagated error for the vector.
+#'
+prop_err <- function(err) {
+  sqrt(sum(err^2))/length(err)
+}
+  
+#' Summarize HGIS standards
+#'
+#' @param data An HGIS results dataframe, either raw or summarized by target
+#'
+#' @return A summary of standard means and errors
+#'
+summarize_standards <- function(data) {
+  data %>% 
+    filter(sample_type == "S") %>% 
+    mutate(max_err = ifelse("max_err" %in% names(.), max_err, sig_14_12)) %>% 
+    summarize(across(corr_14_12, list(mean = mean, se = amstools::se)),
+              propagated_err = prop_err(max_err),
+              norm_std_err = max(corr_14_12_se, propagated_err))
+  # Using greater of se of standards or propagated measurement error of stds as error in norm stds.
 }
 
 #' Normalize HGIS data
@@ -131,18 +162,7 @@ norm_hgis <- function(data, standards = NULL) {
                              TRUE ~ sample_type))
   }
   
-  prop_err <- function(err) {
-    sqrt(sum(err^2))/length(err)
-    
-  }
-  
-  stds <- data %>% 
-    filter(sample_type == "S") %>% 
-    summarize(across(corr_14_12, list(mean = mean, se = amstools::se)),
-              propagated_err = prop_err(max_err),
-              norm_std_err = max(corr_14_12_se, propagated_err))
-  # Using greater of se of standards or propagated measurement error of stds as error in norm stds.
-  
+  stds <- summarize_standards(data)
   
   data %>% 
     mutate(norm_ratio = norm_gas(corr_14_12, stds$corr_14_12_mean),
@@ -200,6 +220,9 @@ blank_cor_hgis <- function(data, blanks = NULL, fmstd = 1.0398) {
 #' @param date Date sample run if analyzing a specific day
 #' @param standards A vector of standard positions.
 #' @param blanks A vector of blank positions.
+#' @param outliers A dataframe of the position and measurement number of outlier runs.
+#' @param remove_outliers Remove outlier runs from analysis if TRUE
+#' @param get_consensus Get consensus values for samples if TRUE
 #'
 #' @return A dataframe of results.
 #' @export

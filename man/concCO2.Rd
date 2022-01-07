@@ -14,6 +14,8 @@ concCO2(t, V = 7000, r = 100, flow = 1, initco2 = 1)
 \item{r}{rate of displacement gas flow}
 
 \item{flow}{rate of gas flow in capillary or outflow. Default of 1 returns fraction of CO2. Should be less than r.}
+
+\item{initco2}{initial fraction co2}
 }
 \value{
 Fractional concentration of CO2 in vessel (and outflow).

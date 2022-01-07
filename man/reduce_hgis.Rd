@@ -22,6 +22,12 @@ reduce_hgis(
 \item{standards}{A vector of standard positions.}
 
 \item{blanks}{A vector of blank positions.}
+
+\item{outliers}{A dataframe of the position and measurement number of outlier runs.}
+
+\item{remove_outliers}{Remove outlier runs from analysis if TRUE}
+
+\item{get_consensus}{Get consensus values for samples if TRUE}
 }
 \value{
 A dataframe of results.

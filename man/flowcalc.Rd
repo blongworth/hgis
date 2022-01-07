@@ -9,7 +9,7 @@ flowcalc(pres, ...)
 \arguments{
 \item{pres}{Differential pressure in kPa.}
 
-\item{...}{}
+\item{...}{Capillary parameters passed to \code{prestoflow()}}
 }
 \value{
 Flow in uL/min.

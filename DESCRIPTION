@@ -13,12 +13,15 @@ Encoding: UTF-8
 LazyData: false
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
+Config/testthat/edition: 3
 Imports:
     amstools,
     dplyr,
     ggplot2,
     magrittr,
-    purrr
+    purrr,
+    readr,
+    stringr
 Suggests:
     DBI,
     here,
@@ -26,3 +29,5 @@ Suggests:
     testthat
 Remotes:
     blongworth/amstools
+Depends: 
+    R (>= 3.5.0)

@@ -24,7 +24,7 @@ prestoflow <- function(dp, r, u, l) {
 #' Calculate flow through a capillary or tube.
 #'
 #' @param pres Differential pressure in kPa.
-#' @param ... 
+#' @param ... Capillary parameters passed to `prestoflow()`
 #'
 #' @return Flow in uL/min.
 #' @export
@@ -50,6 +50,7 @@ flowcalc <- function(pres, ...) {
 #' @param V volume of vessel in same units as r
 #' @param r rate of displacement gas flow
 #' @param flow rate of gas flow in capillary or outflow. Default of 1 returns fraction of CO2. Should be less than r.
+#' @param initco2 initial fraction co2
 #'
 #' @return Fractional concentration of CO2 in vessel (and outflow).
 #' @export

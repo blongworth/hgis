@@ -25,9 +25,9 @@ sum_hgis <- function(data) {
 #' 
 #' Will use normalized data and error if blank corrected data unavailable.
 #'
-#' @param data 
+#' @param data A reduced hgis data object
 #'
-#' @return
+#' @return A summary of replicate sample agreement
 #' @export
 #'
 compare_replicates <- function(data) {

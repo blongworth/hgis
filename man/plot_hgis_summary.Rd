@@ -7,7 +7,7 @@
 plot_hgis_summary(data)
 }
 \arguments{
-\item{data}{}
+\item{data}{An object containing reduced HGIS data}
 }
 \value{
 A ggplot2 object.

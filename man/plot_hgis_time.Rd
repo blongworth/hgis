@@ -12,6 +12,8 @@ plot_hgis_time(data, y_var = normFm, errors = NULL, outlier)
 \item{y_var}{A column to plot against time}
 
 \item{errors}{A column containing errors for y_var}
+
+\item{outlier}{A column containing outliers to flag}
 }
 \value{
 A ggplot object with norm ratio and current vs time,

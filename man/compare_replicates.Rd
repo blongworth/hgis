@@ -7,10 +7,10 @@
 compare_replicates(data)
 }
 \arguments{
-\item{data}{}
+\item{data}{A reduced hgis data object}
 }
 \value{
-
+A summary of replicate sample agreement
 }
 \description{
 Will use normalized data and error if blank corrected data unavailable.
