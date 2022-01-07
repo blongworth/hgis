@@ -27,5 +27,7 @@ Suggests:
     here,
     RSQLite,
     testthat
+Remotes:
+    blongworth/amstools
 Depends: 
     R (>= 3.5.0)
