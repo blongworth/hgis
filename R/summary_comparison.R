@@ -67,5 +67,5 @@ compare_consensus <- function(data) {
                                 rec_num == 38809 ~ "NOSAMS2",
                                 rec_num == 72446 ~ "DeadGas"),
            fm_diff = fm_corr - fm_consensus,
-           sigma = amstools::sigma(fm_corr, fm_consensus, sig_fm_corr))
+           sigma = amsdata::sigma(fm_corr, fm_consensus, sig_fm_corr))
 }

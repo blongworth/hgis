@@ -52,7 +52,7 @@ sum_hgis_targets <- function(data, remove_outliers = TRUE, get_consensus = TRUE)
     summarize(runtime = min(runtime),
               counts = sum(CntTotGT),
               n_runs = n(),
-              ext_err = amstools::se(corr_14_12),
+              ext_err = amsdata::se(corr_14_12),
               #int_err = 1/sqrt(counts) * mean(corr_14_12),
               # now using error propagated mean
               int_err = sqrt(sum((corr_14_12/sqrt(CntTotGT))^2))/n(),
@@ -71,13 +71,8 @@ sum_hgis_targets <- function(data, remove_outliers = TRUE, get_consensus = TRUE)
                                str_starts(sample_name, "DeadGas") ~ 72446)) %>% 
     ungroup()
   if (get_consensus == TRUE) {
-    # TODO: fail gracefully if no DB available or use local file
-    std <- amstools::getStdTable()
     data_sum %>%  
-      left_join(select(std, rec_num, fm_consensus), by = "rec_num") %>% 
-      mutate(fm_consensus = case_when(rec_num == 101730 ~ 1.0398,
-                                      rec_num == 72446 ~ 0.0013,
-                                      TRUE ~ fm_consensus))
+      left_join(select(std, rec_num, fm_consensus), by = "rec_num")
   } else {
     data_sum
   }
@@ -140,7 +135,7 @@ summarize_standards <- function(data) {
   data %>% 
     filter(sample_type == "S") %>% 
     mutate(max_err = ifelse("max_err" %in% names(.), max_err, sig_14_12)) %>% 
-    summarize(across(corr_14_12, list(mean = mean, se = amstools::se)),
+    summarize(across(corr_14_12, list(mean = mean, se = amsdata::se)),
               propagated_err = prop_err(max_err),
               norm_std_err = max(corr_14_12_se, propagated_err))
   # Using greater of se of standards or propagated measurement error of stds as error in norm stds.
@@ -197,11 +192,11 @@ blank_cor_hgis <- function(data, blanks = NULL, fmstd = 1.0398) {
   meanblank <- mean(blanks$norm_ratio)
   
   # get blank error using SNICSer error floor
-  blankerr <- amstools::blankErr(blanks$norm_ratio, blanks$sig_norm_ratio) # uses SNICSer error floor method
+  blankerr <- amsdata::blankErr(blanks$norm_ratio, blanks$sig_norm_ratio) # uses SNICSer error floor method
   # apply blank correction and propagate error
   data %>% 
-    mutate(fm_corr = amstools::doLBC(norm_ratio, meanblank, fmstd),
-           sig_fm_corr = amstools::doLBCerr(norm_ratio, meanblank, fmstd, sig_norm_ratio, blankerr)
+    mutate(fm_corr = amsdata::doLBC(norm_ratio, meanblank, fmstd),
+           sig_fm_corr = amsdata::doLBCerr(norm_ratio, meanblank, fmstd, sig_norm_ratio, blankerr)
           )
 }
 

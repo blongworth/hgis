@@ -15,7 +15,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Config/testthat/edition: 3
 Imports:
-    amstools,
+    amsdata,
     dplyr,
     ggplot2,
     magrittr,
@@ -28,6 +28,6 @@ Suggests:
     RSQLite,
     testthat
 Remotes:
-    blongworth/amstools
+    blongworth/amsdata
 Depends: 
     R (>= 3.5.0)
