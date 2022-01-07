@@ -78,53 +78,6 @@ sum_hgis_targets <- function(data, remove_outliers = TRUE, get_consensus = TRUE)
   }
 }
 
-
-## Normalize
-
-#' Normalize a gas target run using the measured and consensus value of a standard
-#'
-#' @param sample Ratio to be normalized.
-#' @param standard Measured ratio of the standard.
-#' @param stdrat Consensus value of the standard.
-#'
-#' @return The normalized ratio of the sample.
-#' @export
-#'
-norm_gas <- function(sample, standard, stdrat = 1.0398) {
-  sample/standard * stdrat
-}
-
-#' Calculate normalization error
-#'
-#' @param sample The normalized Fm of the sample
-#' @param standard The normalized Fm of the standard
-#' @param sample_err The error of the sample
-#' @param standard_err The error of the standard
-#' @param stdrat The known ratio of the standard
-#' @param stdrat_err The error of the known ratio of standard
-#'
-#' @return The propagated error of the normalized sample
-#' @export
-#'
-norm_err <- function(sample, standard, sample_err, standard_err, 
-                     stdrat = 1.0398, stdrat_err = 0.0006) {
-  sqrt(sample_err^2/sample^2 + 
-       standard_err^2/standard^2 + 
-       stdrat_err^2/stdrat^2)
-}
-
-#' Propagate errors
-#' 
-#' Add errors in quadrature for a vector of errors
-#'
-#' @param err A vector of errors
-#'
-#' @return A propagated error for the vector.
-#'
-prop_err <- function(err) {
-  sqrt(sum(err^2))/length(err)
-}
-  
 #' Summarize HGIS standards
 #'
 #' @param data An HGIS results dataframe, either raw or summarized by target
@@ -136,7 +89,7 @@ summarize_standards <- function(data) {
     filter(sample_type == "S") %>% 
     mutate(max_err = ifelse("max_err" %in% names(.), max_err, sig_14_12)) %>% 
     summarize(across(corr_14_12, list(mean = mean, se = amsdata::se)),
-              propagated_err = prop_err(max_err),
+              propagated_err = amsdata::prop_err(max_err),
               norm_std_err = max(corr_14_12_se, propagated_err))
   # Using greater of se of standards or propagated measurement error of stds as error in norm stds.
 }
@@ -160,12 +113,11 @@ norm_hgis <- function(data, standards = NULL) {
   stds <- summarize_standards(data)
   
   data %>% 
-    mutate(norm_ratio = norm_gas(corr_14_12, stds$corr_14_12_mean),
-           sig_norm_ratio = norm_err(corr_14_12, stds$corr_14_12_mean, max_err, stds$norm_std_err) * norm_ratio, 
+    mutate(norm_ratio = amsdata::norm_run(corr_14_12, stds$corr_14_12_mean),
+           sig_norm_ratio = amsdata::norm_run_err(corr_14_12, stds$corr_14_12_mean, max_err, stds$norm_std_err) * norm_ratio, 
            d13C = mean(norm_del13c)
           )
 }
-
 
 ## Blank correction
 
