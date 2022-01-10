@@ -134,5 +134,5 @@ get_hgis_data <- function(file, date = NULL, standards = NULL) {
     mean()
   
   data <- data %>%
-    mutate(normFm = norm_gas(cor1412he, meanstd))
+    mutate(normFm = amsdata::norm_run(cor1412he, meanstd))
 }
